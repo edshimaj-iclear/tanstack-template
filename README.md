@@ -1,3 +1,13 @@
+# iClear Finance & Accounting Management System
+
+> This repository now hosts the **iClear Finance & Accounting Management System** —
+> a professional, multi-company finance platform built on the TanStack Start +
+> Convex + Claude template below. **See [FINANCE.md](./FINANCE.md) for the
+> finance app's architecture, modules and how to run it.** The original template
+> documentation is retained below.
+
+---
+
 # TanStack Chat Template
 
 ![TanStack Starter Preview](tanstack-starter-preview.jpg)

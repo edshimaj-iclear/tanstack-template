@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 import { ConvexClientProvider } from '../convex'
+import { AppLayout } from '../components/finance/AppLayout'
 
 import appCss from '../styles.css?url'
 
@@ -20,7 +21,7 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TanStack Chat Starter',
+        title: 'iClear Finance — Accounting Suite',
       },
     ],
     links: [
@@ -33,7 +34,9 @@ export const Route = createRootRoute({
 
   component: () => (
     <RootDocument>
-      <Outlet />
+      <AppLayout>
+        <Outlet />
+      </AppLayout>
       <TanStackRouterDevtools />
     </RootDocument>
   ),
@@ -46,9 +49,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <ConvexClientProvider>
-          {children}
-        </ConvexClientProvider>
+        <ConvexClientProvider>{children}</ConvexClientProvider>
         <Scripts />
       </body>
     </html>

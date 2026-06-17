@@ -11,9 +11,107 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as SuppliersImport } from './routes/suppliers'
+import { Route as SalesImport } from './routes/sales'
+import { Route as ReturnsImport } from './routes/returns'
+import { Route as ReportsImport } from './routes/reports'
+import { Route as PurchasesImport } from './routes/purchases'
+import { Route as PaymentsImport } from './routes/payments'
+import { Route as ExpensesImport } from './routes/expenses'
+import { Route as CustomersImport } from './routes/customers'
+import { Route as CompaniesImport } from './routes/companies'
+import { Route as CashImport } from './routes/cash'
+import { Route as BankImport } from './routes/bank'
+import { Route as AuditImport } from './routes/audit'
+import { Route as AssistantImport } from './routes/assistant'
+import { Route as AccountsImport } from './routes/accounts'
 import { Route as IndexImport } from './routes/index'
 
 // Create/Update Routes
+
+const SuppliersRoute = SuppliersImport.update({
+  id: '/suppliers',
+  path: '/suppliers',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const SalesRoute = SalesImport.update({
+  id: '/sales',
+  path: '/sales',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ReturnsRoute = ReturnsImport.update({
+  id: '/returns',
+  path: '/returns',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ReportsRoute = ReportsImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const PurchasesRoute = PurchasesImport.update({
+  id: '/purchases',
+  path: '/purchases',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const PaymentsRoute = PaymentsImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ExpensesRoute = ExpensesImport.update({
+  id: '/expenses',
+  path: '/expenses',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const CustomersRoute = CustomersImport.update({
+  id: '/customers',
+  path: '/customers',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const CompaniesRoute = CompaniesImport.update({
+  id: '/companies',
+  path: '/companies',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const CashRoute = CashImport.update({
+  id: '/cash',
+  path: '/cash',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const BankRoute = BankImport.update({
+  id: '/bank',
+  path: '/bank',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AuditRoute = AuditImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AssistantRoute = AssistantImport.update({
+  id: '/assistant',
+  path: '/assistant',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AccountsRoute = AccountsImport.update({
+  id: '/accounts',
+  path: '/accounts',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const IndexRoute = IndexImport.update({
   id: '/',
@@ -32,6 +130,104 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
+    '/accounts': {
+      id: '/accounts'
+      path: '/accounts'
+      fullPath: '/accounts'
+      preLoaderRoute: typeof AccountsImport
+      parentRoute: typeof rootRoute
+    }
+    '/assistant': {
+      id: '/assistant'
+      path: '/assistant'
+      fullPath: '/assistant'
+      preLoaderRoute: typeof AssistantImport
+      parentRoute: typeof rootRoute
+    }
+    '/audit': {
+      id: '/audit'
+      path: '/audit'
+      fullPath: '/audit'
+      preLoaderRoute: typeof AuditImport
+      parentRoute: typeof rootRoute
+    }
+    '/bank': {
+      id: '/bank'
+      path: '/bank'
+      fullPath: '/bank'
+      preLoaderRoute: typeof BankImport
+      parentRoute: typeof rootRoute
+    }
+    '/cash': {
+      id: '/cash'
+      path: '/cash'
+      fullPath: '/cash'
+      preLoaderRoute: typeof CashImport
+      parentRoute: typeof rootRoute
+    }
+    '/companies': {
+      id: '/companies'
+      path: '/companies'
+      fullPath: '/companies'
+      preLoaderRoute: typeof CompaniesImport
+      parentRoute: typeof rootRoute
+    }
+    '/customers': {
+      id: '/customers'
+      path: '/customers'
+      fullPath: '/customers'
+      preLoaderRoute: typeof CustomersImport
+      parentRoute: typeof rootRoute
+    }
+    '/expenses': {
+      id: '/expenses'
+      path: '/expenses'
+      fullPath: '/expenses'
+      preLoaderRoute: typeof ExpensesImport
+      parentRoute: typeof rootRoute
+    }
+    '/payments': {
+      id: '/payments'
+      path: '/payments'
+      fullPath: '/payments'
+      preLoaderRoute: typeof PaymentsImport
+      parentRoute: typeof rootRoute
+    }
+    '/purchases': {
+      id: '/purchases'
+      path: '/purchases'
+      fullPath: '/purchases'
+      preLoaderRoute: typeof PurchasesImport
+      parentRoute: typeof rootRoute
+    }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsImport
+      parentRoute: typeof rootRoute
+    }
+    '/returns': {
+      id: '/returns'
+      path: '/returns'
+      fullPath: '/returns'
+      preLoaderRoute: typeof ReturnsImport
+      parentRoute: typeof rootRoute
+    }
+    '/sales': {
+      id: '/sales'
+      path: '/sales'
+      fullPath: '/sales'
+      preLoaderRoute: typeof SalesImport
+      parentRoute: typeof rootRoute
+    }
+    '/suppliers': {
+      id: '/suppliers'
+      path: '/suppliers'
+      fullPath: '/suppliers'
+      preLoaderRoute: typeof SuppliersImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -39,32 +235,148 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/accounts': typeof AccountsRoute
+  '/assistant': typeof AssistantRoute
+  '/audit': typeof AuditRoute
+  '/bank': typeof BankRoute
+  '/cash': typeof CashRoute
+  '/companies': typeof CompaniesRoute
+  '/customers': typeof CustomersRoute
+  '/expenses': typeof ExpensesRoute
+  '/payments': typeof PaymentsRoute
+  '/purchases': typeof PurchasesRoute
+  '/reports': typeof ReportsRoute
+  '/returns': typeof ReturnsRoute
+  '/sales': typeof SalesRoute
+  '/suppliers': typeof SuppliersRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/accounts': typeof AccountsRoute
+  '/assistant': typeof AssistantRoute
+  '/audit': typeof AuditRoute
+  '/bank': typeof BankRoute
+  '/cash': typeof CashRoute
+  '/companies': typeof CompaniesRoute
+  '/customers': typeof CustomersRoute
+  '/expenses': typeof ExpensesRoute
+  '/payments': typeof PaymentsRoute
+  '/purchases': typeof PurchasesRoute
+  '/reports': typeof ReportsRoute
+  '/returns': typeof ReturnsRoute
+  '/sales': typeof SalesRoute
+  '/suppliers': typeof SuppliersRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/accounts': typeof AccountsRoute
+  '/assistant': typeof AssistantRoute
+  '/audit': typeof AuditRoute
+  '/bank': typeof BankRoute
+  '/cash': typeof CashRoute
+  '/companies': typeof CompaniesRoute
+  '/customers': typeof CustomersRoute
+  '/expenses': typeof ExpensesRoute
+  '/payments': typeof PaymentsRoute
+  '/purchases': typeof PurchasesRoute
+  '/reports': typeof ReportsRoute
+  '/returns': typeof ReturnsRoute
+  '/sales': typeof SalesRoute
+  '/suppliers': typeof SuppliersRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/accounts'
+    | '/assistant'
+    | '/audit'
+    | '/bank'
+    | '/cash'
+    | '/companies'
+    | '/customers'
+    | '/expenses'
+    | '/payments'
+    | '/purchases'
+    | '/reports'
+    | '/returns'
+    | '/sales'
+    | '/suppliers'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/accounts'
+    | '/assistant'
+    | '/audit'
+    | '/bank'
+    | '/cash'
+    | '/companies'
+    | '/customers'
+    | '/expenses'
+    | '/payments'
+    | '/purchases'
+    | '/reports'
+    | '/returns'
+    | '/sales'
+    | '/suppliers'
+  id:
+    | '__root__'
+    | '/'
+    | '/accounts'
+    | '/assistant'
+    | '/audit'
+    | '/bank'
+    | '/cash'
+    | '/companies'
+    | '/customers'
+    | '/expenses'
+    | '/payments'
+    | '/purchases'
+    | '/reports'
+    | '/returns'
+    | '/sales'
+    | '/suppliers'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AccountsRoute: typeof AccountsRoute
+  AssistantRoute: typeof AssistantRoute
+  AuditRoute: typeof AuditRoute
+  BankRoute: typeof BankRoute
+  CashRoute: typeof CashRoute
+  CompaniesRoute: typeof CompaniesRoute
+  CustomersRoute: typeof CustomersRoute
+  ExpensesRoute: typeof ExpensesRoute
+  PaymentsRoute: typeof PaymentsRoute
+  PurchasesRoute: typeof PurchasesRoute
+  ReportsRoute: typeof ReportsRoute
+  ReturnsRoute: typeof ReturnsRoute
+  SalesRoute: typeof SalesRoute
+  SuppliersRoute: typeof SuppliersRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AccountsRoute: AccountsRoute,
+  AssistantRoute: AssistantRoute,
+  AuditRoute: AuditRoute,
+  BankRoute: BankRoute,
+  CashRoute: CashRoute,
+  CompaniesRoute: CompaniesRoute,
+  CustomersRoute: CustomersRoute,
+  ExpensesRoute: ExpensesRoute,
+  PaymentsRoute: PaymentsRoute,
+  PurchasesRoute: PurchasesRoute,
+  ReportsRoute: ReportsRoute,
+  ReturnsRoute: ReturnsRoute,
+  SalesRoute: SalesRoute,
+  SuppliersRoute: SuppliersRoute,
 }
 
 export const routeTree = rootRoute
@@ -77,11 +389,67 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/"
+        "/",
+        "/accounts",
+        "/assistant",
+        "/audit",
+        "/bank",
+        "/cash",
+        "/companies",
+        "/customers",
+        "/expenses",
+        "/payments",
+        "/purchases",
+        "/reports",
+        "/returns",
+        "/sales",
+        "/suppliers"
       ]
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/accounts": {
+      "filePath": "accounts.tsx"
+    },
+    "/assistant": {
+      "filePath": "assistant.tsx"
+    },
+    "/audit": {
+      "filePath": "audit.tsx"
+    },
+    "/bank": {
+      "filePath": "bank.tsx"
+    },
+    "/cash": {
+      "filePath": "cash.tsx"
+    },
+    "/companies": {
+      "filePath": "companies.tsx"
+    },
+    "/customers": {
+      "filePath": "customers.tsx"
+    },
+    "/expenses": {
+      "filePath": "expenses.tsx"
+    },
+    "/payments": {
+      "filePath": "payments.tsx"
+    },
+    "/purchases": {
+      "filePath": "purchases.tsx"
+    },
+    "/reports": {
+      "filePath": "reports.tsx"
+    },
+    "/returns": {
+      "filePath": "returns.tsx"
+    },
+    "/sales": {
+      "filePath": "sales.tsx"
+    },
+    "/suppliers": {
+      "filePath": "suppliers.tsx"
     }
   }
 }
