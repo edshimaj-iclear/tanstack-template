@@ -20,6 +20,14 @@ npm run dev        # http://localhost:3000
 The AI Finance Assistant additionally needs `ANTHROPIC_API_KEY` (see the main
 README). All other modules work fully offline.
 
+## Gjuha e kodit / Code language
+
+Krejt kodi i domenit është në **shqip** — emrat e tipave, fushave, funksioneve,
+variablave dhe komentet (p.sh. `Fatura`, `kompaniaId`, `totaletFatures`,
+`shtoKlient`, `permbledhje`). Vetëm API-të e framework-ut mbeten anglisht sepse
+i përkasin librarive (React: `className`/`onClick`/`children`; TanStack:
+`createFileRoute`/`Route`; formati i mesazheve të Claude: `role`/`content`).
+
 ## Architecture
 
 The platform is a client-first SPA with SSR via TanStack Start. State lives in a

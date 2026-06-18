@@ -1,20 +1,20 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Banknote, User } from 'lucide-react'
 import {
-  useFinanceState,
-  useCurrentCompanyId,
-  scoped,
-  cashRegisterBalance,
-  partyName,
-  formatDate,
-  formatMoney,
+  usePerdorGjendjen,
+  useKompaniaAktualeId,
+  teFiltruara,
+  balancaArkes,
+  emriPales,
+  formatoDate,
+  formatoPara,
 } from '../finance'
 import { PageHeader, Card, CardHeader, Table, Th, Td, Money } from '../components/finance/ui'
 
-function Cash() {
-  const state = useFinanceState()
-  const companyId = useCurrentCompanyId()
-  const registers = scoped(state.cashRegisters, companyId)
+function Arka() {
+  const gjendja = usePerdorGjendjen()
+  const kompaniaId = useKompaniaAktualeId()
+  const arkat = teFiltruara(gjendja.arkat, kompaniaId)
 
   return (
     <div>
@@ -24,15 +24,15 @@ function Cash() {
       />
 
       <div className="grid grid-cols-1 gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-4">
-        {registers.map((r) => (
-          <Card key={r.id} className="p-5">
+        {arkat.map((arka) => (
+          <Card key={arka.id} className="p-5">
             <div className="flex items-center gap-2 mb-3 text-slate-500">
               <Banknote className="w-4 h-4" />
-              <span className="text-sm font-medium text-slate-700">{r.name}</span>
+              <span className="text-sm font-medium text-slate-700">{arka.emri}</span>
             </div>
-            <p className="text-2xl font-semibold text-slate-900">{formatMoney(cashRegisterBalance(state, r.id))}</p>
-            <p className="mt-1 text-xs text-slate-400">Hapje: {formatMoney(r.openingBalance, r.currency)}</p>
-            <p className="flex items-center gap-1 mt-2 text-xs text-slate-500"><User className="w-3.5 h-3.5" /> {r.responsible}</p>
+            <p className="text-2xl font-semibold text-slate-900">{formatoPara(balancaArkes(gjendja, arka.id))}</p>
+            <p className="mt-1 text-xs text-slate-400">Hapje: {formatoPara(arka.balancaFillestare, arka.monedha)}</p>
+            <p className="flex items-center gap-1 mt-2 text-xs text-slate-500"><User className="w-3.5 h-3.5" /> {arka.pergjegjesi}</p>
           </Card>
         ))}
       </div>
@@ -40,18 +40,18 @@ function Cash() {
       <Card>
         <CardHeader title="Lëvizjet e arkës" />
         <Table head={<><Th>Data</Th><Th>Arka</Th><Th>Pala</Th><Th>Lloji</Th><Th align="right">Shuma</Th></>}>
-          {scoped(state.payments, companyId)
-            .filter((p) => p.cashRegisterId)
-            .sort((a, b) => b.date.localeCompare(a.date))
+          {teFiltruara(gjendja.pagesat, kompaniaId)
+            .filter((p) => p.arkaId)
+            .sort((a, b) => b.data.localeCompare(a.data))
             .map((p) => {
-              const reg = state.cashRegisters.find((r) => r.id === p.cashRegisterId)
+              const arka = gjendja.arkat.find((a) => a.id === p.arkaId)
               return (
                 <tr key={p.id}>
-                  <Td>{formatDate(p.date)}</Td>
-                  <Td>{reg?.name}</Td>
-                  <Td>{partyName(state, p.partyId)}</Td>
-                  <Td>{p.direction === 'in' ? 'Hyrje' : 'Dalje'}</Td>
-                  <Td align="right"><span className={p.direction === 'in' ? 'text-emerald-600' : 'text-rose-600'}>{p.direction === 'in' ? '+' : '−'}<Money amount={p.amount} currency={p.currency} /></span></Td>
+                  <Td>{formatoDate(p.data)}</Td>
+                  <Td>{arka?.emri}</Td>
+                  <Td>{emriPales(gjendja, p.palaId)}</Td>
+                  <Td>{p.drejtimi === 'hyrje' ? 'Hyrje' : 'Dalje'}</Td>
+                  <Td align="right"><span className={p.drejtimi === 'hyrje' ? 'text-emerald-600' : 'text-rose-600'}>{p.drejtimi === 'hyrje' ? '+' : '−'}<Money amount={p.shuma} currency={p.monedha} /></span></Td>
                 </tr>
               )
             })}
@@ -62,5 +62,5 @@ function Cash() {
 }
 
 export const Route = createFileRoute('/cash')({
-  component: Cash,
+  component: Arka,
 })

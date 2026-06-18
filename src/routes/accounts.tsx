@@ -1,37 +1,37 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
-import { useFinanceState, useFinanceActions } from '../finance'
-import type { AccountType } from '../finance'
+import { usePerdorGjendjen, useVeprimetFinanca } from '../finance'
+import type { LlojiLlogarise } from '../finance'
 import { PageHeader, Card, CardHeader, Table, Th, Td, Button } from '../components/finance/ui'
 import { Modal, Field, Input, Select } from '../components/finance/forms'
 
-const TYPE_LABELS: Record<AccountType, string> = {
-  asset: 'Asete',
-  liability: 'Detyrime',
-  equity: 'Kapital',
-  income: 'Të ardhura',
-  expense: 'Shpenzime',
+const ETIKETAT_LLOJIT: Record<LlojiLlogarise, string> = {
+  aktiv: 'Asete',
+  detyrim: 'Detyrime',
+  kapital: 'Kapital',
+  teArdhura: 'Të ardhura',
+  shpenzim: 'Shpenzime',
 }
 
-const TYPE_ORDER: AccountType[] = ['asset', 'liability', 'equity', 'income', 'expense']
+const RENDITJA_LLOJEVE: LlojiLlogarise[] = ['aktiv', 'detyrim', 'kapital', 'teArdhura', 'shpenzim']
 
-function Accounts() {
-  const state = useFinanceState()
-  const actions = useFinanceActions()
-  const [open, setOpen] = useState(false)
-  const [form, setForm] = useState({ code: '', name: '', type: 'asset' as AccountType, parentId: '' })
+function PlaniKontabel() {
+  const gjendja = usePerdorGjendjen()
+  const veprimet = useVeprimetFinanca()
+  const [hapur, setHapur] = useState(false)
+  const [forma, setForma] = useState({ kodi: '', emri: '', lloji: 'aktiv' as LlojiLlogarise, prinderId: '' })
 
-  const submit = () => {
-    if (!form.code || !form.name) return
-    actions.addAccount({
-      code: form.code,
-      name: form.name,
-      type: form.type,
-      parentId: form.parentId || undefined,
+  const ruaj = () => {
+    if (!forma.kodi || !forma.emri) return
+    veprimet.shtoLlogari({
+      kodi: forma.kodi,
+      emri: forma.emri,
+      lloji: forma.lloji,
+      prinderId: forma.prinderId || undefined,
     })
-    setForm({ code: '', name: '', type: 'asset', parentId: '' })
-    setOpen(false)
+    setForma({ kodi: '', emri: '', lloji: 'aktiv', prinderId: '' })
+    setHapur(false)
   }
 
   return (
@@ -40,27 +40,27 @@ function Accounts() {
         title="Plani Kontabël"
         subtitle="Chart of Accounts me kategori, nënllogari dhe kodifikim kontabël."
         actions={
-          <Button onClick={() => setOpen(true)}>
+          <Button onClick={() => setHapur(true)}>
             <Plus className="w-4 h-4" /> Llogari e re
           </Button>
         }
       />
 
       <div className="space-y-6">
-        {TYPE_ORDER.map((type) => {
-          const rows = state.accounts.filter((a) => a.type === type)
-          if (rows.length === 0) return null
+        {RENDITJA_LLOJEVE.map((lloji) => {
+          const rreshtat = gjendja.llogarite.filter((a) => a.lloji === lloji)
+          if (rreshtat.length === 0) return null
           return (
-            <Card key={type}>
-              <CardHeader title={TYPE_LABELS[type]} />
+            <Card key={lloji}>
+              <CardHeader title={ETIKETAT_LLOJIT[lloji]} />
               <Table head={<><Th>Kodi</Th><Th>Emri</Th><Th>Nënllogari e</Th></>}>
-                {rows.map((a) => {
-                  const parent = a.parentId ? state.accounts.find((p) => p.id === a.parentId) : null
+                {rreshtat.map((a) => {
+                  const prinderi = a.prinderId ? gjendja.llogarite.find((p) => p.id === a.prinderId) : null
                   return (
                     <tr key={a.id}>
-                      <Td className="font-mono">{a.code}</Td>
-                      <Td className={a.parentId ? 'pl-8' : 'font-medium'}>{a.name}</Td>
-                      <Td>{parent ? `${parent.code} · ${parent.name}` : '—'}</Td>
+                      <Td className="font-mono">{a.kodi}</Td>
+                      <Td className={a.prinderId ? 'pl-8' : 'font-medium'}>{a.emri}</Td>
+                      <Td>{prinderi ? `${prinderi.kodi} · ${prinderi.emri}` : '—'}</Td>
                     </tr>
                   )
                 })}
@@ -71,32 +71,32 @@ function Accounts() {
       </div>
 
       <Modal
-        open={open}
-        onClose={() => setOpen(false)}
+        open={hapur}
+        onClose={() => setHapur(false)}
         title="Krijo llogari të re"
         footer={
           <>
-            <Button variant="secondary" onClick={() => setOpen(false)}>Anulo</Button>
-            <Button onClick={submit}>Ruaj</Button>
+            <Button variant="secondary" onClick={() => setHapur(false)}>Anulo</Button>
+            <Button onClick={ruaj}>Ruaj</Button>
           </>
         }
       >
         <Field label="Kodi kontabël">
-          <Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} placeholder="p.sh. 1060" />
+          <Input value={forma.kodi} onChange={(e) => setForma({ ...forma, kodi: e.target.value })} placeholder="p.sh. 1060" />
         </Field>
         <Field label="Emri i llogarisë">
-          <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          <Input value={forma.emri} onChange={(e) => setForma({ ...forma, emri: e.target.value })} />
         </Field>
         <Field label="Kategoria">
-          <Select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as AccountType })}>
-            {TYPE_ORDER.map((t) => <option key={t} value={t}>{TYPE_LABELS[t]}</option>)}
+          <Select value={forma.lloji} onChange={(e) => setForma({ ...forma, lloji: e.target.value as LlojiLlogarise })}>
+            {RENDITJA_LLOJEVE.map((t) => <option key={t} value={t}>{ETIKETAT_LLOJIT[t]}</option>)}
           </Select>
         </Field>
         <Field label="Nënllogari e (opsionale)">
-          <Select value={form.parentId} onChange={(e) => setForm({ ...form, parentId: e.target.value })}>
+          <Select value={forma.prinderId} onChange={(e) => setForma({ ...forma, prinderId: e.target.value })}>
             <option value="">— Asnjë —</option>
-            {state.accounts.filter((a) => a.type === form.type && !a.parentId).map((a) => (
-              <option key={a.id} value={a.id}>{a.code} · {a.name}</option>
+            {gjendja.llogarite.filter((a) => a.lloji === forma.lloji && !a.prinderId).map((a) => (
+              <option key={a.id} value={a.id}>{a.kodi} · {a.emri}</option>
             ))}
           </Select>
         </Field>
@@ -106,5 +106,5 @@ function Accounts() {
 }
 
 export const Route = createFileRoute('/accounts')({
-  component: Accounts,
+  component: PlaniKontabel,
 })

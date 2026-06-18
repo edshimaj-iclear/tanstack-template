@@ -18,7 +18,7 @@ import {
   Sparkles,
   ChevronDown,
 } from 'lucide-react'
-import { useFinanceState, useFinanceActions } from '../../finance'
+import { usePerdorGjendjen, useVeprimetFinanca } from '../../finance'
 
 interface NavItem {
   to: string
@@ -78,18 +78,18 @@ const NAV: NavGroup[] = [
 ]
 
 function CompanySwitcher() {
-  const { companies, currentCompanyId } = useFinanceState()
-  const { setCurrentCompany } = useFinanceActions()
+  const { kompanite, kompaniaAktualeId } = usePerdorGjendjen()
+  const { vendosKompanineAktuale } = useVeprimetFinanca()
   return (
     <div className="relative">
       <select
-        value={currentCompanyId}
-        onChange={(e) => setCurrentCompany(e.target.value)}
+        value={kompaniaAktualeId}
+        onChange={(e) => vendosKompanineAktuale(e.target.value)}
         className="w-full py-2 pl-3 pr-8 text-sm font-medium bg-slate-800 border border-slate-700 rounded-lg appearance-none text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
       >
-        {companies.map((c) => (
-          <option key={c.id} value={c.id}>
-            {c.isGroup ? `★ ${c.name} (Konsoliduar)` : c.name}
+        {kompanite.map((k) => (
+          <option key={k.id} value={k.id}>
+            {k.eshteGrup ? `★ ${k.emri} (Konsoliduar)` : k.emri}
           </option>
         ))}
       </select>

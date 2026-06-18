@@ -2,35 +2,35 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import {
-  useFinanceState,
-  useCurrentCompanyId,
-  scoped,
-  invoiceTotals,
-  partyName,
-  formatDate,
-  formatMoney,
+  usePerdorGjendjen,
+  useKompaniaAktualeId,
+  teFiltruara,
+  totaletFatures,
+  emriPales,
+  formatoDate,
+  formatoPara,
 } from '../finance'
 import { PageHeader, Card, CardHeader, Table, Th, Td, Button, Badge, Money } from '../components/finance/ui'
 import { InvoiceFormModal } from '../components/finance/InvoiceFormModal'
 
-function Purchases() {
-  const state = useFinanceState()
-  const companyId = useCurrentCompanyId()
-  const [open, setOpen] = useState(false)
+function FaturaBlerjeje() {
+  const gjendja = usePerdorGjendjen()
+  const kompaniaId = useKompaniaAktualeId()
+  const [hapur, setHapur] = useState(false)
 
-  const invoices = scoped(state.invoices, companyId)
-    .filter((i) => i.kind === 'purchase')
-    .sort((a, b) => b.issueDate.localeCompare(a.issueDate))
+  const faturat = teFiltruara(gjendja.faturat, kompaniaId)
+    .filter((f) => f.lloji === 'blerje')
+    .sort((a, b) => b.dataLeshimit.localeCompare(a.dataLeshimit))
 
   return (
     <div>
       <PageHeader
         title="Fatura Blerjeje"
         subtitle="Blerje, import, doganë, transport — kosto reale e produktit me kosto shtesë."
-        actions={<Button onClick={() => setOpen(true)}><Plus className="w-4 h-4" /> Faturë e re</Button>}
+        actions={<Button onClick={() => setHapur(true)}><Plus className="w-4 h-4" /> Faturë e re</Button>}
       />
       <Card>
-        <CardHeader title={`${invoices.length} fatura`} />
+        <CardHeader title={`${faturat.length} fatura`} />
         <Table
           head={
             <>
@@ -40,32 +40,32 @@ function Purchases() {
               <Th align="right">Totali</Th>
               <Th align="right">Kosto shtesë</Th>
               <Th align="right">Mbetur</Th>
-              <Th align="center">Status</Th>
+              <Th align="center">Statusi</Th>
             </>
           }
         >
-          {invoices.map((inv) => {
-            const t = invoiceTotals(state, inv)
-            const extra = (inv.extraCosts ?? []).reduce((s, c) => s + c.amount, 0)
+          {faturat.map((fatura) => {
+            const t = totaletFatures(gjendja, fatura)
+            const shtese = (fatura.kostoShtese ?? []).reduce((s, c) => s + c.shuma, 0)
             return (
-              <tr key={inv.id}>
-                <Td className="font-medium">{inv.number}</Td>
-                <Td>{partyName(state, inv.partyId)}</Td>
-                <Td>{formatDate(inv.issueDate)}</Td>
-                <Td align="right" className="font-medium"><Money amount={t.total} currency={inv.currency} /></Td>
-                <Td align="right">{extra > 0 ? formatMoney(extra, inv.currency) : '—'}</Td>
-                <Td align="right"><Money amount={t.outstanding} currency={inv.currency} /></Td>
-                <Td align="center"><Badge status={inv.status} /></Td>
+              <tr key={fatura.id}>
+                <Td className="font-medium">{fatura.numri}</Td>
+                <Td>{emriPales(gjendja, fatura.palaId)}</Td>
+                <Td>{formatoDate(fatura.dataLeshimit)}</Td>
+                <Td align="right" className="font-medium"><Money amount={t.totali} currency={fatura.monedha} /></Td>
+                <Td align="right">{shtese > 0 ? formatoPara(shtese, fatura.monedha) : '—'}</Td>
+                <Td align="right"><Money amount={t.mbetur} currency={fatura.monedha} /></Td>
+                <Td align="center"><Badge status={fatura.statusi} /></Td>
               </tr>
             )
           })}
         </Table>
       </Card>
-      <InvoiceFormModal kind="purchase" companyId={companyId} open={open} onClose={() => setOpen(false)} />
+      <InvoiceFormModal lloji="blerje" kompaniaId={kompaniaId} open={hapur} onClose={() => setHapur(false)} />
     </div>
   )
 }
 
 export const Route = createFileRoute('/purchases')({
-  component: Purchases,
+  component: FaturaBlerjeje,
 })

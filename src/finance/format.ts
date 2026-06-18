@@ -1,36 +1,36 @@
-import type { Currency } from './types'
+import type { Monedha } from './types'
 
-const CURRENCY_LOCALE: Record<Currency, string> = {
+const LOKALJA_MONEDHES: Record<Monedha, string> = {
   EUR: 'de-DE',
   ALL: 'sq-AL',
   USD: 'en-US',
   GBP: 'en-GB',
 }
 
-export function formatMoney(amount: number, currency: Currency = 'EUR'): string {
+export function formatoPara(shuma: number, monedha: Monedha = 'EUR'): string {
   try {
-    return new Intl.NumberFormat(CURRENCY_LOCALE[currency] ?? 'en-US', {
+    return new Intl.NumberFormat(LOKALJA_MONEDHES[monedha] ?? 'en-US', {
       style: 'currency',
-      currency,
-      maximumFractionDigits: currency === 'ALL' ? 0 : 2,
-    }).format(amount)
+      currency: monedha,
+      maximumFractionDigits: monedha === 'ALL' ? 0 : 2,
+    }).format(shuma)
   } catch {
-    return `${amount.toFixed(2)} ${currency}`
+    return `${shuma.toFixed(2)} ${monedha}`
   }
 }
 
-export function formatNumber(value: number, fractionDigits = 0): string {
+export function formatoNumer(vlera: number, shifraDhjetore = 0): string {
   return new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: fractionDigits,
-    maximumFractionDigits: fractionDigits,
-  }).format(value)
+    minimumFractionDigits: shifraDhjetore,
+    maximumFractionDigits: shifraDhjetore,
+  }).format(vlera)
 }
 
-export function formatPercent(value: number, fractionDigits = 1): string {
-  return `${(value * 100).toFixed(fractionDigits)}%`
+export function formatoPerqindje(vlera: number, shifraDhjetore = 1): string {
+  return `${(vlera * 100).toFixed(shifraDhjetore)}%`
 }
 
-export function formatDate(iso: string): string {
+export function formatoDate(iso: string): string {
   if (!iso) return ''
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return iso
@@ -41,12 +41,12 @@ export function formatDate(iso: string): string {
   })
 }
 
-export function daysBetween(fromIso: string, toIso: string): number {
-  const from = new Date(fromIso).getTime()
-  const to = new Date(toIso).getTime()
-  return Math.round((to - from) / (1000 * 60 * 60 * 24))
+export function ditetMidis(ngaIso: string, deriIso: string): number {
+  const nga = new Date(ngaIso).getTime()
+  const deri = new Date(deriIso).getTime()
+  return Math.round((deri - nga) / (1000 * 60 * 60 * 24))
 }
 
-export function monthKey(iso: string): string {
+export function celesiMuajit(iso: string): string {
   return iso.slice(0, 7) // "YYYY-MM"
 }

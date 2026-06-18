@@ -2,39 +2,39 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import {
-  useFinanceState,
-  useCurrentCompanyId,
-  useFinanceActions,
-  customerStatement,
-  scoped,
-  formatMoney,
+  usePerdorGjendjen,
+  useKompaniaAktualeId,
+  useVeprimetFinanca,
+  kartelaKlientit,
+  teFiltruara,
+  formatoPara,
 } from '../finance'
 import { PageHeader, Card, CardHeader, Table, Th, Td, Button, Money, ProgressBar } from '../components/finance/ui'
 import { Modal, Field, Input } from '../components/finance/forms'
 
-function Customers() {
-  const state = useFinanceState()
-  const companyId = useCurrentCompanyId()
-  const actions = useFinanceActions()
-  const [open, setOpen] = useState(false)
-  const [form, setForm] = useState({ name: '', nipt: '', email: '', phone: '', creditLimit: '5000' })
+function Klientet() {
+  const gjendja = usePerdorGjendjen()
+  const kompaniaId = useKompaniaAktualeId()
+  const veprimet = useVeprimetFinanca()
+  const [hapur, setHapur] = useState(false)
+  const [forma, setForma] = useState({ emri: '', nipt: '', email: '', telefoni: '', limitiKreditit: '5000' })
 
-  const targetCompany = companyId === 'grp' ? state.companies.find((c) => !c.isGroup)!.id : companyId
-  const list = scoped(state.customers, companyId)
+  const kompaniaSynuar = kompaniaId === 'grp' ? gjendja.kompanite.find((k) => !k.eshteGrup)!.id : kompaniaId
+  const lista = teFiltruara(gjendja.klientet, kompaniaId)
 
-  const submit = () => {
-    if (!form.name) return
-    actions.addCustomer({
-      companyId: targetCompany,
-      name: form.name,
-      nipt: form.nipt || undefined,
-      email: form.email || undefined,
-      phone: form.phone || undefined,
-      creditLimit: Number(form.creditLimit) || 0,
-      active: true,
+  const ruaj = () => {
+    if (!forma.emri) return
+    veprimet.shtoKlient({
+      kompaniaId: kompaniaSynuar,
+      emri: forma.emri,
+      nipt: forma.nipt || undefined,
+      email: forma.email || undefined,
+      telefoni: forma.telefoni || undefined,
+      limitiKreditit: Number(forma.limitiKreditit) || 0,
+      aktiv: true,
     })
-    setForm({ name: '', nipt: '', email: '', phone: '', creditLimit: '5000' })
-    setOpen(false)
+    setForma({ emri: '', nipt: '', email: '', telefoni: '', limitiKreditit: '5000' })
+    setHapur(false)
   }
 
   return (
@@ -42,10 +42,10 @@ function Customers() {
       <PageHeader
         title="Kartela e Klientit"
         subtitle="Bleu, pagoi, borxhi, limiti i kreditit dhe statusi për çdo klient."
-        actions={<Button onClick={() => setOpen(true)}><Plus className="w-4 h-4" /> Klient i ri</Button>}
+        actions={<Button onClick={() => setHapur(true)}><Plus className="w-4 h-4" /> Klient i ri</Button>}
       />
       <Card>
-        <CardHeader title={`${list.length} klientë`} />
+        <CardHeader title={`${lista.length} klientë`} />
         <Table
           head={
             <>
@@ -58,22 +58,22 @@ function Customers() {
             </>
           }
         >
-          {list.map((c) => {
-            const st = customerStatement(state, c.id)
+          {lista.map((klienti) => {
+            const kartela = kartelaKlientit(gjendja, klienti.id)
             return (
-              <tr key={c.id}>
+              <tr key={klienti.id}>
                 <Td>
-                  <p className="font-medium text-slate-800">{c.name}</p>
-                  <p className="text-xs text-slate-400">{c.nipt ?? 'Klient privat'}</p>
+                  <p className="font-medium text-slate-800">{klienti.emri}</p>
+                  <p className="text-xs text-slate-400">{klienti.nipt ?? 'Klient privat'}</p>
                 </Td>
-                <Td className="text-xs text-slate-500">{c.email}<br />{c.phone}</Td>
-                <Td align="right"><Money amount={st.invoiced} /></Td>
-                <Td align="right"><Money amount={st.paid} /></Td>
-                <Td align="right"><span className={st.balance > 0 ? 'text-amber-600 font-medium' : 'text-slate-500'}>{formatMoney(st.balance)}</span></Td>
+                <Td className="text-xs text-slate-500">{klienti.email}<br />{klienti.telefoni}</Td>
+                <Td align="right"><Money amount={kartela.faturuar} /></Td>
+                <Td align="right"><Money amount={kartela.paguar} /></Td>
+                <Td align="right"><span className={kartela.balanca > 0 ? 'text-amber-600 font-medium' : 'text-slate-500'}>{formatoPara(kartela.balanca)}</span></Td>
                 <Td>
                   <div className="w-32">
-                    <ProgressBar value={st.balance} max={c.creditLimit} />
-                    <p className="mt-1 text-xs text-slate-400">{formatMoney(c.creditLimit)} limit</p>
+                    <ProgressBar value={kartela.balanca} max={klienti.limitiKreditit} />
+                    <p className="mt-1 text-xs text-slate-400">{formatoPara(klienti.limitiKreditit)} limit</p>
                   </div>
                 </Td>
               </tr>
@@ -83,23 +83,23 @@ function Customers() {
       </Card>
 
       <Modal
-        open={open}
-        onClose={() => setOpen(false)}
+        open={hapur}
+        onClose={() => setHapur(false)}
         title="Shto klient të ri"
-        footer={<><Button variant="secondary" onClick={() => setOpen(false)}>Anulo</Button><Button onClick={submit}>Ruaj</Button></>}
+        footer={<><Button variant="secondary" onClick={() => setHapur(false)}>Anulo</Button><Button onClick={ruaj}>Ruaj</Button></>}
       >
-        <Field label="Emri"><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></Field>
-        <Field label="NIPT / VAT"><Input value={form.nipt} onChange={(e) => setForm({ ...form, nipt: e.target.value })} /></Field>
+        <Field label="Emri"><Input value={forma.emri} onChange={(e) => setForma({ ...forma, emri: e.target.value })} /></Field>
+        <Field label="NIPT / VAT"><Input value={forma.nipt} onChange={(e) => setForma({ ...forma, nipt: e.target.value })} /></Field>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Email"><Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></Field>
-          <Field label="Telefon"><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></Field>
+          <Field label="Email"><Input value={forma.email} onChange={(e) => setForma({ ...forma, email: e.target.value })} /></Field>
+          <Field label="Telefon"><Input value={forma.telefoni} onChange={(e) => setForma({ ...forma, telefoni: e.target.value })} /></Field>
         </div>
-        <Field label="Limiti i kreditit (€)"><Input type="number" value={form.creditLimit} onChange={(e) => setForm({ ...form, creditLimit: e.target.value })} /></Field>
+        <Field label="Limiti i kreditit (€)"><Input type="number" value={forma.limitiKreditit} onChange={(e) => setForma({ ...forma, limitiKreditit: e.target.value })} /></Field>
       </Modal>
     </div>
   )
 }
 
 export const Route = createFileRoute('/customers')({
-  component: Customers,
+  component: Klientet,
 })

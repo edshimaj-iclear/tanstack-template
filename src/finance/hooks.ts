@@ -1,18 +1,18 @@
 import { useStore } from '@tanstack/react-store'
-import { financeStore, financeActions, type FinanceState } from './store'
+import { financaStore, veprimetFinanca, type GjendjaFinanca } from './store'
 
-export function useFinanceState(): FinanceState {
-  return useStore(financeStore, (s) => s)
+export function usePerdorGjendjen(): GjendjaFinanca {
+  return useStore(financaStore, (g) => g)
 }
 
-export function useFinanceSlice<T>(selector: (s: FinanceState) => T): T {
-  return useStore(financeStore, selector)
+export function usePjesaGjendjes<T>(perzgjedhes: (g: GjendjaFinanca) => T): T {
+  return useStore(financaStore, perzgjedhes)
 }
 
-export function useCurrentCompanyId(): string {
-  return useStore(financeStore, (s) => s.currentCompanyId)
+export function useKompaniaAktualeId(): string {
+  return useStore(financaStore, (g) => g.kompaniaAktualeId)
 }
 
-export function useFinanceActions() {
-  return financeActions
+export function useVeprimetFinanca() {
+  return veprimetFinanca
 }

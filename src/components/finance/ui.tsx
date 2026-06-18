@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
-import { formatMoney } from '../../finance'
-import type { Currency } from '../../finance'
+import { formatoPara } from '../../finance'
+import type { Monedha } from '../../finance'
 
 export function PageHeader({
   title,
@@ -88,36 +88,36 @@ export function StatCard({
   )
 }
 
-const BADGE_TONES: Record<string, string> = {
+const NGJYRAT_BADGE: Record<string, string> = {
   draft: 'bg-slate-100 text-slate-600',
-  approved: 'bg-blue-100 text-blue-700',
-  paid: 'bg-emerald-100 text-emerald-700',
-  partially_paid: 'bg-amber-100 text-amber-700',
-  cancelled: 'bg-rose-100 text-rose-700',
-  pending: 'bg-amber-100 text-amber-700',
-  rejected: 'bg-rose-100 text-rose-700',
-  positive: 'bg-emerald-100 text-emerald-700',
+  aprovuar: 'bg-blue-100 text-blue-700',
+  paguar: 'bg-emerald-100 text-emerald-700',
+  pjeserisht: 'bg-amber-100 text-amber-700',
+  anuluar: 'bg-rose-100 text-rose-700',
+  pritje: 'bg-amber-100 text-amber-700',
+  refuzuar: 'bg-rose-100 text-rose-700',
+  pozitive: 'bg-emerald-100 text-emerald-700',
   negative: 'bg-rose-100 text-rose-700',
-  neutral: 'bg-slate-100 text-slate-600',
+  neutrale: 'bg-slate-100 text-slate-600',
 }
 
-const BADGE_LABELS: Record<string, string> = {
+const ETIKETAT_BADGE: Record<string, string> = {
   draft: 'Draft',
-  approved: 'Aprovuar',
-  paid: 'Paguar',
-  partially_paid: 'Pjesërisht',
-  cancelled: 'Anuluar',
-  pending: 'Në pritje',
-  rejected: 'Refuzuar',
+  aprovuar: 'Aprovuar',
+  paguar: 'Paguar',
+  pjeserisht: 'Pjesërisht',
+  anuluar: 'Anuluar',
+  pritje: 'Në pritje',
+  refuzuar: 'Refuzuar',
 }
 
 export function Badge({ status, label }: { status: string; label?: string }) {
-  const tone = BADGE_TONES[status] ?? 'bg-slate-100 text-slate-600'
+  const tone = NGJYRAT_BADGE[status] ?? 'bg-slate-100 text-slate-600'
   return (
     <span
       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${tone}`}
     >
-      {label ?? BADGE_LABELS[status] ?? status}
+      {label ?? ETIKETAT_BADGE[status] ?? status}
     </span>
   )
 }
@@ -128,14 +128,14 @@ export function Money({
   tone,
 }: {
   amount: number
-  currency?: Currency
+  currency?: Monedha
   tone?: 'auto' | 'none'
 }) {
   let color = ''
   if (tone === 'auto') {
     color = amount < 0 ? 'text-rose-600' : 'text-slate-900'
   }
-  return <span className={`tabular-nums ${color}`}>{formatMoney(amount, currency)}</span>
+  return <span className={`tabular-nums ${color}`}>{formatoPara(amount, currency)}</span>
 }
 
 export function Table({

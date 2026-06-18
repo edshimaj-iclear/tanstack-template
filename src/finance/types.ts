@@ -1,227 +1,227 @@
-// Core domain types for the Finance & Accounting Management System.
-// All monetary values are stored as numbers in the entity's own currency;
-// the base-currency value is derived using the stored exchange rate.
+// Tipat e domenit për Sistemin e Menaxhimit Financiar & Kontabël.
+// Vlerat monetare ruhen si numra në monedhën e vetë entitetit; vlera në
+// monedhën bazë (EUR) nxirret duke përdorur kursin e këmbimit të ruajtur.
 
-export type Currency = 'EUR' | 'ALL' | 'USD' | 'GBP'
+export type Monedha = 'EUR' | 'ALL' | 'USD' | 'GBP'
 
-export type AccountType =
-  | 'asset'
-  | 'liability'
-  | 'equity'
-  | 'income'
-  | 'expense'
+export type LlojiLlogarise =
+  | 'aktiv'
+  | 'detyrim'
+  | 'kapital'
+  | 'teArdhura'
+  | 'shpenzim'
 
-export type InvoiceKind = 'sale' | 'purchase'
+export type LlojiFatures = 'shitje' | 'blerje'
 
-export type InvoiceStatus =
+export type StatusiFatures =
   | 'draft'
-  | 'approved'
-  | 'paid'
-  | 'partially_paid'
-  | 'cancelled'
+  | 'aprovuar'
+  | 'paguar'
+  | 'pjeserisht'
+  | 'anuluar'
 
-export type PaymentDirection = 'in' | 'out'
+export type DrejtimiPageses = 'hyrje' | 'dalje'
 
-export type PaymentMethod = 'cash' | 'bank' | 'card' | 'transfer'
+export type MenyraPageses = 'cash' | 'banke' | 'karte' | 'transferte'
 
-export type ApprovalStatus = 'pending' | 'approved' | 'rejected'
+export type StatusiAprovimit = 'pritje' | 'aprovuar' | 'refuzuar'
 
-export type Role =
+export type Roli =
   | 'ceo'
   | 'cfo'
-  | 'accountant'
-  | 'sales_manager'
-  | 'warehouse_manager'
-  | 'hr_manager'
-  | 'branch_manager'
-  | 'employee'
-  | 'auditor'
+  | 'kontabilist'
+  | 'menaxherShitjesh'
+  | 'menaxherMagazine'
+  | 'menaxherHr'
+  | 'menaxherDege'
+  | 'punonjes'
+  | 'auditues'
 
-export interface Company {
+export interface Kompania {
   id: string
-  name: string
-  nipt: string // NIPT / VAT number
-  baseCurrency: Currency
-  country: string
-  isGroup?: boolean // the consolidated group entity
+  emri: string
+  nipt: string // NIPT / numri i TVSH-së
+  monedhaBaze: Monedha
+  shteti: string
+  eshteGrup?: boolean // entiteti i konsoliduar i grupit
 }
 
-export interface Account {
+export interface Llogaria {
   id: string
-  code: string // accounting code, e.g. "1010"
-  name: string
-  type: AccountType
-  parentId?: string // for sub-accounts
+  kodi: string // kodi kontabël, p.sh. "1010"
+  emri: string
+  lloji: LlojiLlogarise
+  prinderId?: string // për nënllogaritë
 }
 
-export interface Customer {
+export interface Klienti {
   id: string
-  companyId: string
-  name: string
+  kompaniaId: string
+  emri: string
   nipt?: string
   email?: string
-  phone?: string
-  address?: string
-  creditLimit: number // in base currency
-  active: boolean
-  notes?: string
+  telefoni?: string
+  adresa?: string
+  limitiKreditit: number // në monedhën bazë
+  aktiv: boolean
+  shenime?: string
 }
 
-export interface Supplier {
+export interface Furnitori {
   id: string
-  companyId: string
-  name: string
+  kompaniaId: string
+  emri: string
   nipt?: string
   email?: string
-  phone?: string
-  paymentTermsDays: number
-  active: boolean
+  telefoni?: string
+  afatiPagesesDite: number
+  aktiv: boolean
 }
 
-export interface Warehouse {
+export interface Magazina {
   id: string
-  companyId: string
-  name: string
+  kompaniaId: string
+  emri: string
 }
 
-export interface Product {
+export interface Produkti {
   id: string
-  companyId: string
+  kompaniaId: string
   sku: string
-  name: string
-  unitPrice: number // sales price in company base currency
-  cost: number // landed cost in company base currency
-  vatRate: number // e.g. 0.2 for 20%
-  stock: number
-  warehouseId: string
+  emri: string
+  cmimiNjesi: number // çmimi i shitjes në monedhën bazë të kompanisë
+  kostoja: number // kosto e plotë (landed cost) në monedhën bazë
+  normaTvsh: number // p.sh. 0.2 për 20%
+  stoku: number
+  magazinaId: string
 }
 
-export interface InvoiceLine {
+export interface RrjeshtFature {
   id: string
-  productId?: string
-  description: string
-  quantity: number
-  unitPrice: number
-  discount: number // fractional, e.g. 0.1 = 10%
-  vatRate: number
+  produktiId?: string
+  pershkrimi: string
+  sasia: number
+  cmimiNjesi: number
+  zbritja: number // në fraksion, p.sh. 0.1 = 10%
+  normaTvsh: number
 }
 
-export interface Invoice {
+export interface Fatura {
   id: string
-  companyId: string
-  kind: InvoiceKind
-  number: string
-  partyId: string // customerId for sale, supplierId for purchase
-  issueDate: string // ISO date
-  dueDate: string
-  currency: Currency
-  exchangeRate: number // multiply to get base currency
-  status: InvoiceStatus
-  lines: InvoiceLine[]
-  paidAmount: number // in invoice currency
-  notes?: string
-  // Extra landed costs for purchases (transport, customs, bank fees...)
-  extraCosts?: { label: string; amount: number }[]
+  kompaniaId: string
+  lloji: LlojiFatures
+  numri: string
+  palaId: string // klientiId për shitje, furnitoriId për blerje
+  dataLeshimit: string // datë ISO
+  dataAfatit: string
+  monedha: Monedha
+  kursiKembimit: number // shumëzo për të marrë monedhën bazë
+  statusi: StatusiFatures
+  rrjeshtat: RrjeshtFature[]
+  shumaPaguar: number // në monedhën e faturës
+  shenime?: string
+  // Kosto shtesë për blerjet (transport, doganë, tarifa bankare...)
+  kostoShtese?: { etiketa: string; shuma: number }[]
 }
 
-export interface Payment {
+export interface Pagesa {
   id: string
-  companyId: string
-  direction: PaymentDirection
-  method: PaymentMethod
-  partyId: string
-  invoiceId?: string
-  amount: number
-  currency: Currency
-  exchangeRate: number
-  date: string
-  reference?: string
-  // where the money landed/left
-  cashRegisterId?: string
-  bankAccountId?: string
+  kompaniaId: string
+  drejtimi: DrejtimiPageses
+  menyra: MenyraPageses
+  palaId: string
+  faturaId?: string
+  shuma: number
+  monedha: Monedha
+  kursiKembimit: number
+  data: string
+  referenca?: string
+  // ku hyri/doli paraja
+  arkaId?: string
+  llogariaBankareId?: string
 }
 
-export interface CashRegister {
+export interface Arka {
   id: string
-  companyId: string
-  name: string
-  currency: Currency
-  openingBalance: number
-  responsible: string
+  kompaniaId: string
+  emri: string
+  monedha: Monedha
+  balancaFillestare: number
+  pergjegjesi: string
 }
 
-export interface BankAccount {
+export interface LlogariaBankare {
   id: string
-  companyId: string
-  name: string
+  kompaniaId: string
+  emri: string
   iban: string
-  currency: Currency
-  openingBalance: number
+  monedha: Monedha
+  balancaFillestare: number
 }
 
-export type ExpenseCategory =
-  | 'rent'
-  | 'salary'
+export type KategoriaShpenzimit =
+  | 'qira'
+  | 'rroga'
   | 'marketing'
   | 'transport'
-  | 'customs'
-  | 'materials'
-  | 'equipment'
-  | 'maintenance'
-  | 'training'
-  | 'commission'
-  | 'travel'
-  | 'bank_fees'
-  | 'consulting'
-  | 'other'
+  | 'dogane'
+  | 'materiale'
+  | 'pajisje'
+  | 'mirembajtje'
+  | 'trajnime'
+  | 'komision'
+  | 'udhetim'
+  | 'tarifaBankare'
+  | 'konsulence'
+  | 'tjeter'
 
-export interface Expense {
+export interface Shpenzimi {
   id: string
-  companyId: string
-  category: ExpenseCategory
-  date: string
-  description: string
-  amount: number
-  currency: Currency
-  exchangeRate: number
-  responsible: string
-  status: ApprovalStatus
-  paymentMethod: PaymentMethod
+  kompaniaId: string
+  kategoria: KategoriaShpenzimit
+  data: string
+  pershkrimi: string
+  shuma: number
+  monedha: Monedha
+  kursiKembimit: number
+  pergjegjesi: string
+  statusi: StatusiAprovimit
+  menyraPageses: MenyraPageses
 }
 
-export interface CreditNoteItem {
-  description: string
-  amount: number
+export interface ArtikullNoteKrediti {
+  pershkrimi: string
+  shuma: number
 }
 
-// Models a customer return that may be exchanged for a different product,
-// recording only the net difference to pay (per the spec example).
-export interface CreditNote {
+// Modelon një kthim nga klienti që mund të shkëmbehet me një produkt tjetër,
+// duke regjistruar vetëm diferencën neto për pagesë (sipas shembullit te kërkesat).
+export interface NotaKrediti {
   id: string
-  companyId: string
-  customerId: string
-  originalInvoiceId: string
-  date: string
-  returnedItems: CreditNoteItem[]
-  replacementItems: CreditNoteItem[]
-  currency: Currency
-  notes?: string
+  kompaniaId: string
+  klientiId: string
+  faturaOrigjinaleId: string
+  data: string
+  artikujtKthyer: ArtikullNoteKrediti[]
+  artikujtZevendesues: ArtikullNoteKrediti[]
+  monedha: Monedha
+  shenime?: string
 }
 
-export interface AuditEntry {
+export interface ZeriAuditit {
   id: string
-  timestamp: number
-  user: string
-  action: string
-  entity: string
-  before?: string
-  after?: string
+  koha: number
+  perdoruesi: string
+  veprimi: string
+  entiteti: string
+  para?: string
+  pas?: string
   ip: string
-  device: string
+  pajisja: string
 }
 
-export interface ExchangeRates {
-  // value of 1 unit of currency in the system base currency (EUR)
-  base: Currency
-  rates: Record<Currency, number>
+export interface KursetKembimit {
+  // vlera e 1 njësie të monedhës në monedhën bazë të sistemit (EUR)
+  baza: Monedha
+  kurset: Record<Monedha, number>
 }

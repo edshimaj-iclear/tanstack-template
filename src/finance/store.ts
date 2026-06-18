@@ -1,205 +1,205 @@
 import { Store } from '@tanstack/store'
 import {
-  accounts as seedAccounts,
-  auditLog as seedAudit,
-  bankAccounts as seedBanks,
-  cashRegisters as seedCash,
-  companies as seedCompanies,
-  creditNotes as seedCreditNotes,
-  customers as seedCustomers,
-  exchangeRates as seedRates,
-  expenses as seedExpenses,
-  invoices as seedInvoices,
-  payments as seedPayments,
-  products as seedProducts,
-  suppliers as seedSuppliers,
-  warehouses as seedWarehouses,
+  llogarite as fareLlogarite,
+  regjistriAuditit as fareAudit,
+  llogariteBankare as fareBanka,
+  arkat as fareArka,
+  kompanite as fareKompani,
+  notatKrediti as fareNotaKrediti,
+  klientet as fareKlientet,
+  kursetKembimit as fareKurset,
+  shpenzimet as fareShpenzime,
+  faturat as fareFatura,
+  pagesat as farePagesa,
+  produktet as fareProdukte,
+  furnitoret as fareFurnitore,
+  magazinat as fareMagazina,
 } from './seed'
 import type {
-  Account,
-  AuditEntry,
-  BankAccount,
-  CashRegister,
-  Company,
-  CreditNote,
-  Customer,
-  ExchangeRates,
-  Expense,
-  Invoice,
-  Payment,
-  Product,
-  Supplier,
-  Warehouse,
+  Llogaria,
+  ZeriAuditit,
+  LlogariaBankare,
+  Arka,
+  Kompania,
+  NotaKrediti,
+  Klienti,
+  KursetKembimit,
+  Shpenzimi,
+  Fatura,
+  Pagesa,
+  Produkti,
+  Furnitori,
+  Magazina,
 } from './types'
 
-export interface FinanceState {
-  companies: Company[]
-  accounts: Account[]
-  customers: Customer[]
-  suppliers: Supplier[]
-  warehouses: Warehouse[]
-  products: Product[]
-  invoices: Invoice[]
-  payments: Payment[]
-  cashRegisters: CashRegister[]
-  bankAccounts: BankAccount[]
-  expenses: Expense[]
-  creditNotes: CreditNote[]
-  auditLog: AuditEntry[]
-  exchangeRates: ExchangeRates
-  // UI state
-  currentCompanyId: string // "grp" = consolidated group view
+export interface GjendjaFinanca {
+  kompanite: Kompania[]
+  llogarite: Llogaria[]
+  klientet: Klienti[]
+  furnitoret: Furnitori[]
+  magazinat: Magazina[]
+  produktet: Produkti[]
+  faturat: Fatura[]
+  pagesat: Pagesa[]
+  arkat: Arka[]
+  llogariteBankare: LlogariaBankare[]
+  shpenzimet: Shpenzimi[]
+  notatKrediti: NotaKrediti[]
+  regjistriAuditit: ZeriAuditit[]
+  kursetKembimit: KursetKembimit
+  // Gjendja e UI-së
+  kompaniaAktualeId: string // "grp" = pamja e konsoliduar e grupit
 }
 
-const STORAGE_KEY = 'iclear-finance-state-v1'
+const CELESI_RUAJTJES = 'iclear-finance-state-v1'
 
-function seededState(): FinanceState {
+function gjendjaFillestare(): GjendjaFinanca {
   return {
-    companies: seedCompanies,
-    accounts: seedAccounts,
-    customers: seedCustomers,
-    suppliers: seedSuppliers,
-    warehouses: seedWarehouses,
-    products: seedProducts,
-    invoices: seedInvoices,
-    payments: seedPayments,
-    cashRegisters: seedCash,
-    bankAccounts: seedBanks,
-    expenses: seedExpenses,
-    creditNotes: seedCreditNotes,
-    auditLog: seedAudit,
-    exchangeRates: seedRates,
-    currentCompanyId: 'grp',
+    kompanite: fareKompani,
+    llogarite: fareLlogarite,
+    klientet: fareKlientet,
+    furnitoret: fareFurnitore,
+    magazinat: fareMagazina,
+    produktet: fareProdukte,
+    faturat: fareFatura,
+    pagesat: farePagesa,
+    arkat: fareArka,
+    llogariteBankare: fareBanka,
+    shpenzimet: fareShpenzime,
+    notatKrediti: fareNotaKrediti,
+    regjistriAuditit: fareAudit,
+    kursetKembimit: fareKurset,
+    kompaniaAktualeId: 'grp',
   }
 }
 
-function loadState(): FinanceState {
-  if (typeof window === 'undefined') return seededState()
+function ngarkoGjendjen(): GjendjaFinanca {
+  if (typeof window === 'undefined') return gjendjaFillestare()
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY)
-    if (!raw) return seededState()
-    const parsed = JSON.parse(raw) as Partial<FinanceState>
-    // Merge over a fresh seed so newly-added fields are always present.
-    // Always start on the consolidated group view so the first client render
-    // matches the server-rendered HTML (avoids hydration mismatch).
-    return { ...seededState(), ...parsed, currentCompanyId: 'grp' }
+    const teDhenat = window.localStorage.getItem(CELESI_RUAJTJES)
+    if (!teDhenat) return gjendjaFillestare()
+    const analizuar = JSON.parse(teDhenat) as Partial<GjendjaFinanca>
+    // Bashkojmë mbi një gjendje të freskët fillestare që fushat e reja të jenë gjithmonë prezente.
+    // Fillojmë gjithmonë në pamjen e grupit që render-i i parë i klientit të
+    // përputhet me HTML-në e render-uar nga serveri (shmang mospërputhjen e hidratimit).
+    return { ...gjendjaFillestare(), ...analizuar, kompaniaAktualeId: 'grp' }
   } catch {
-    return seededState()
+    return gjendjaFillestare()
   }
 }
 
-export const financeStore = new Store<FinanceState>(loadState())
+export const financaStore = new Store<GjendjaFinanca>(ngarkoGjendjen())
 
-// Persist to localStorage on every change (client only).
+// Ruajtje në localStorage në çdo ndryshim (vetëm në klient).
 if (typeof window !== 'undefined') {
-  financeStore.subscribe(() => {
+  financaStore.subscribe(() => {
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(financeStore.state))
+      window.localStorage.setItem(CELESI_RUAJTJES, JSON.stringify(financaStore.state))
     } catch {
-      /* ignore quota / serialization errors */
+      /* injoro gabimet e kuotës / serializimit */
     }
   })
 }
 
-function uid(prefix: string): string {
-  return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`
+function idRe(prefiks: string): string {
+  return `${prefiks}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`
 }
 
-function logAudit(action: string, entity: string, after?: string) {
-  const entry: AuditEntry = {
-    id: uid('au'),
-    timestamp: Date.now(),
-    user: 'edshimaj',
-    action,
-    entity,
-    after,
+function regjistroAudit(veprimi: string, entiteti: string, pas?: string) {
+  const zeri: ZeriAuditit = {
+    id: idRe('au'),
+    koha: Date.now(),
+    perdoruesi: 'edshimaj',
+    veprimi,
+    entiteti,
+    pas,
     ip: '127.0.0.1',
-    device: 'Web app',
+    pajisja: 'Aplikacioni web',
   }
-  financeStore.setState((s) => ({ ...s, auditLog: [entry, ...s.auditLog] }))
+  financaStore.setState((g) => ({ ...g, regjistriAuditit: [zeri, ...g.regjistriAuditit] }))
 }
 
-export const financeActions = {
-  setCurrentCompany(companyId: string) {
-    financeStore.setState((s) => ({ ...s, currentCompanyId: companyId }))
+export const veprimetFinanca = {
+  vendosKompanineAktuale(kompaniaId: string) {
+    financaStore.setState((g) => ({ ...g, kompaniaAktualeId: kompaniaId }))
   },
 
-  resetToSeed() {
-    financeStore.setState(() => seededState())
+  rivendosTeDhenat() {
+    financaStore.setState(() => gjendjaFillestare())
   },
 
-  addCustomer(input: Omit<Customer, 'id'>) {
-    const customer: Customer = { ...input, id: uid('c') }
-    financeStore.setState((s) => ({ ...s, customers: [...s.customers, customer] }))
-    logAudit('create', `Customer ${customer.name}`)
-    return customer.id
+  shtoKlient(hyrje: Omit<Klienti, 'id'>) {
+    const klienti: Klienti = { ...hyrje, id: idRe('c') }
+    financaStore.setState((g) => ({ ...g, klientet: [...g.klientet, klienti] }))
+    regjistroAudit('krijim', `Klienti ${klienti.emri}`)
+    return klienti.id
   },
 
-  addSupplier(input: Omit<Supplier, 'id'>) {
-    const supplier: Supplier = { ...input, id: uid('s') }
-    financeStore.setState((s) => ({ ...s, suppliers: [...s.suppliers, supplier] }))
-    logAudit('create', `Supplier ${supplier.name}`)
-    return supplier.id
+  shtoFurnitor(hyrje: Omit<Furnitori, 'id'>) {
+    const furnitori: Furnitori = { ...hyrje, id: idRe('s') }
+    financaStore.setState((g) => ({ ...g, furnitoret: [...g.furnitoret, furnitori] }))
+    regjistroAudit('krijim', `Furnitori ${furnitori.emri}`)
+    return furnitori.id
   },
 
-  addAccount(input: Omit<Account, 'id'>) {
-    const account: Account = { ...input, id: uid('acc') }
-    financeStore.setState((s) => ({ ...s, accounts: [...s.accounts, account] }))
-    logAudit('create', `Account ${account.code} ${account.name}`)
-    return account.id
+  shtoLlogari(hyrje: Omit<Llogaria, 'id'>) {
+    const llogaria: Llogaria = { ...hyrje, id: idRe('acc') }
+    financaStore.setState((g) => ({ ...g, llogarite: [...g.llogarite, llogaria] }))
+    regjistroAudit('krijim', `Llogaria ${llogaria.kodi} ${llogaria.emri}`)
+    return llogaria.id
   },
 
-  addInvoice(input: Omit<Invoice, 'id'>) {
-    const invoice: Invoice = { ...input, id: uid('inv') }
-    financeStore.setState((s) => ({ ...s, invoices: [...s.invoices, invoice] }))
-    logAudit('create', `Invoice ${invoice.number}`)
-    return invoice.id
+  shtoFature(hyrje: Omit<Fatura, 'id'>) {
+    const fatura: Fatura = { ...hyrje, id: idRe('inv') }
+    financaStore.setState((g) => ({ ...g, faturat: [...g.faturat, fatura] }))
+    regjistroAudit('krijim', `Fatura ${fatura.numri}`)
+    return fatura.id
   },
 
-  updateInvoiceStatus(id: string, status: Invoice['status']) {
-    financeStore.setState((s) => ({
-      ...s,
-      invoices: s.invoices.map((i) => (i.id === id ? { ...i, status } : i)),
+  ndryshoStatusinFatures(id: string, statusi: Fatura['statusi']) {
+    financaStore.setState((g) => ({
+      ...g,
+      faturat: g.faturat.map((f) => (f.id === id ? { ...f, statusi } : f)),
     }))
-    logAudit('update', `Invoice ${id}`, `status=${status}`)
+    regjistroAudit('ndryshim', `Fatura ${id}`, `statusi=${statusi}`)
   },
 
-  addPayment(input: Omit<Payment, 'id'>) {
-    const payment: Payment = { ...input, id: uid('pay') }
-    financeStore.setState((s) => {
-      let invoices = s.invoices
-      if (payment.invoiceId) {
-        invoices = s.invoices.map((inv) => {
-          if (inv.id !== payment.invoiceId) return inv
-          const paidAmount = inv.paidAmount + payment.amount
-          return { ...inv, paidAmount }
+  shtoPagese(hyrje: Omit<Pagesa, 'id'>) {
+    const pagesa: Pagesa = { ...hyrje, id: idRe('pay') }
+    financaStore.setState((g) => {
+      let faturat = g.faturat
+      if (pagesa.faturaId) {
+        faturat = g.faturat.map((fatura) => {
+          if (fatura.id !== pagesa.faturaId) return fatura
+          const shumaPaguar = fatura.shumaPaguar + pagesa.shuma
+          return { ...fatura, shumaPaguar }
         })
       }
-      return { ...s, payments: [...s.payments, payment], invoices }
+      return { ...g, pagesat: [...g.pagesat, pagesa], faturat }
     })
-    logAudit('create', `Payment ${payment.amount} ${payment.currency}`)
-    return payment.id
+    regjistroAudit('krijim', `Pagesa ${pagesa.shuma} ${pagesa.monedha}`)
+    return pagesa.id
   },
 
-  addExpense(input: Omit<Expense, 'id'>) {
-    const expense: Expense = { ...input, id: uid('ex') }
-    financeStore.setState((s) => ({ ...s, expenses: [...s.expenses, expense] }))
-    logAudit('create', `Expense ${expense.description}`)
-    return expense.id
+  shtoShpenzim(hyrje: Omit<Shpenzimi, 'id'>) {
+    const shpenzimi: Shpenzimi = { ...hyrje, id: idRe('ex') }
+    financaStore.setState((g) => ({ ...g, shpenzimet: [...g.shpenzimet, shpenzimi] }))
+    regjistroAudit('krijim', `Shpenzimi ${shpenzimi.pershkrimi}`)
+    return shpenzimi.id
   },
 
-  setExpenseStatus(id: string, status: Expense['status']) {
-    financeStore.setState((s) => ({
-      ...s,
-      expenses: s.expenses.map((e) => (e.id === id ? { ...e, status } : e)),
+  vendosStatusinShpenzimit(id: string, statusi: Shpenzimi['statusi']) {
+    financaStore.setState((g) => ({
+      ...g,
+      shpenzimet: g.shpenzimet.map((sh) => (sh.id === id ? { ...sh, statusi } : sh)),
     }))
-    logAudit(status === 'approved' ? 'approve' : 'reject', `Expense ${id}`)
+    regjistroAudit(statusi === 'aprovuar' ? 'aprovim' : 'refuzim', `Shpenzimi ${id}`)
   },
 
-  addCreditNote(input: Omit<CreditNote, 'id'>) {
-    const note: CreditNote = { ...input, id: uid('cn') }
-    financeStore.setState((s) => ({ ...s, creditNotes: [...s.creditNotes, note] }))
-    logAudit('create', `CreditNote ${note.id}`)
-    return note.id
+  shtoNoteKrediti(hyrje: Omit<NotaKrediti, 'id'>) {
+    const nota: NotaKrediti = { ...hyrje, id: idRe('cn') }
+    financaStore.setState((g) => ({ ...g, notatKrediti: [...g.notatKrediti, nota] }))
+    regjistroAudit('krijim', `NotaKrediti ${nota.id}`)
+    return nota.id
   },
 }

@@ -1,429 +1,422 @@
-import type { FinanceState } from './store'
-import { monthKey } from './format'
-import type {
-  Currency,
-  Invoice,
-  InvoiceLine,
-} from './types'
+import type { GjendjaFinanca } from './store'
+import { celesiMuajit } from './format'
+import type { Monedha, Fatura, RrjeshtFature } from './types'
 
 // ---------------------------------------------------------------------------
-// Currency conversion
+// Konvertim monedhe
 // ---------------------------------------------------------------------------
-export function toBase(
-  state: FinanceState,
-  amount: number,
-  currency: Currency,
-  rate?: number,
+export function neBaze(
+  gjendja: GjendjaFinanca,
+  shuma: number,
+  monedha: Monedha,
+  kursi?: number,
 ): number {
-  if (rate && rate > 0) return amount * rate
-  const r = state.exchangeRates.rates[currency] ?? 1
-  return amount * r
+  if (kursi && kursi > 0) return shuma * kursi
+  const k = gjendja.kursetKembimit.kurset[monedha] ?? 1
+  return shuma * k
 }
 
 // ---------------------------------------------------------------------------
-// Company scoping. "grp" means the consolidated group (all operating companies)
+// Fokusimi sipas kompanisë. "grp" do të thotë grupi i konsoliduar (të gjitha kompanitë operative)
 // ---------------------------------------------------------------------------
-export function isGroupView(companyId: string): boolean {
-  return companyId === 'grp'
+export function eshtePamjaGrup(kompaniaId: string): boolean {
+  return kompaniaId === 'grp'
 }
 
-function inScope<T extends { companyId: string }>(
-  rows: T[],
-  companyId: string,
+function brendaFushes<T extends { kompaniaId: string }>(
+  rreshtat: T[],
+  kompaniaId: string,
 ): T[] {
-  if (isGroupView(companyId)) return rows.filter((r) => r.companyId !== 'grp')
-  return rows.filter((r) => r.companyId === companyId)
+  if (eshtePamjaGrup(kompaniaId)) return rreshtat.filter((r) => r.kompaniaId !== 'grp')
+  return rreshtat.filter((r) => r.kompaniaId === kompaniaId)
 }
 
 // ---------------------------------------------------------------------------
-// Invoice math
+// Matematika e faturës
 // ---------------------------------------------------------------------------
-export function lineNet(l: InvoiceLine): number {
-  return l.quantity * l.unitPrice * (1 - l.discount)
+export function rrjeshtNeto(l: RrjeshtFature): number {
+  return l.sasia * l.cmimiNjesi * (1 - l.zbritja)
 }
-export function lineVat(l: InvoiceLine): number {
-  return lineNet(l) * l.vatRate
-}
-
-export interface InvoiceTotals {
-  net: number
-  vat: number
-  total: number
-  baseTotal: number
-  baseNet: number
-  baseVat: number
-  outstanding: number // in invoice currency
-  baseOutstanding: number
+export function rrjeshtTvsh(l: RrjeshtFature): number {
+  return rrjeshtNeto(l) * l.normaTvsh
 }
 
-export function invoiceTotals(
-  _state: FinanceState,
-  inv: Invoice,
-): InvoiceTotals {
-  const net = inv.lines.reduce((sum, l) => sum + lineNet(l), 0)
-  const vat = inv.lines.reduce((sum, l) => sum + lineVat(l), 0)
-  const total = net + vat
-  const outstanding = Math.max(0, total - inv.paidAmount)
-  const r = inv.exchangeRate || 1
+export interface TotaletFatures {
+  neto: number
+  tvsh: number
+  totali: number
+  totaliBaze: number
+  netoBaze: number
+  tvshBaze: number
+  mbetur: number // në monedhën e faturës
+  mberturBaze: number
+}
+
+export function totaletFatures(
+  _gjendja: GjendjaFinanca,
+  fatura: Fatura,
+): TotaletFatures {
+  const neto = fatura.rrjeshtat.reduce((shuma, l) => shuma + rrjeshtNeto(l), 0)
+  const tvsh = fatura.rrjeshtat.reduce((shuma, l) => shuma + rrjeshtTvsh(l), 0)
+  const totali = neto + tvsh
+  const mbetur = Math.max(0, totali - fatura.shumaPaguar)
+  const k = fatura.kursiKembimit || 1
   return {
-    net,
-    vat,
-    total,
-    baseNet: net * r,
-    baseVat: vat * r,
-    baseTotal: total * r,
-    outstanding,
-    baseOutstanding: outstanding * r,
+    neto,
+    tvsh,
+    totali,
+    netoBaze: neto * k,
+    tvshBaze: tvsh * k,
+    totaliBaze: totali * k,
+    mbetur,
+    mberturBaze: mbetur * k,
   }
 }
 
-// COGS for a sales invoice, using product cost where available.
-export function invoiceCogs(state: FinanceState, inv: Invoice): number {
-  if (inv.kind !== 'sale') return 0
-  const r = inv.exchangeRate || 1
-  return inv.lines.reduce((sum, l) => {
-    const product = l.productId
-      ? state.products.find((p) => p.id === l.productId)
+// Kosto e mallrave të shitura (COGS) për një faturë shitjeje, duke përdorur koston e produktit.
+export function kostoFatures(gjendja: GjendjaFinanca, fatura: Fatura): number {
+  if (fatura.lloji !== 'shitje') return 0
+  const k = fatura.kursiKembimit || 1
+  return fatura.rrjeshtat.reduce((shuma, l) => {
+    const produkti = l.produktiId
+      ? gjendja.produktet.find((p) => p.id === l.produktiId)
       : undefined
-    const unitCost = product ? product.cost : l.unitPrice * 0.4
-    return sum + unitCost * l.quantity * r
+    const kostoNjesi = produkti ? produkti.kostoja : l.cmimiNjesi * 0.4
+    return shuma + kostoNjesi * l.sasia * k
   }, 0)
 }
 
 // ---------------------------------------------------------------------------
-// Aggregate financial metrics (all in base currency = EUR)
+// Metrika financiare të agreguara (të gjitha në monedhën bazë = EUR)
 // ---------------------------------------------------------------------------
-export interface FinancialSummary {
-  revenue: number
-  cogs: number
-  grossProfit: number
-  operatingExpenses: number
+export interface PermbledhjeFinanciare {
+  teArdhura: number
+  kosto: number
+  fitimiBruto: number
+  shpenzimeOperative: number
   ebitda: number
-  depreciation: number
-  netProfit: number
-  receivables: number
-  payables: number
-  cashBalance: number
-  bankBalance: number
-  vatOutput: number
-  vatInput: number
-  vatPayable: number
-  inventoryValue: number
-  unpaidInvoiceCount: number
-  overdueInvoiceCount: number
+  amortizimi: number
+  fitimiNeto: number
+  teArketueshme: number
+  tePagueshme: number
+  balancaArkes: number
+  balancaBankes: number
+  tvshDalese: number
+  tvshZbritese: number
+  tvshPerPagese: number
+  vleraStokut: number
+  numriFaturaveTePapaguara: number
+  numriFaturaveMbiAfat: number
 }
 
-const today = '2026-06-17'
+const sot = '2026-06-17'
 
-export function summary(
-  state: FinanceState,
-  companyId: string,
-  opts: { from?: string; to?: string } = {},
-): FinancialSummary {
-  const invoices = inScope(state.invoices, companyId).filter((i) => {
-    if (i.status === 'cancelled') return false
-    if (opts.from && i.issueDate < opts.from) return false
-    if (opts.to && i.issueDate > opts.to) return false
+export function permbledhje(
+  gjendja: GjendjaFinanca,
+  kompaniaId: string,
+  opsionet: { nga?: string; deri?: string } = {},
+): PermbledhjeFinanciare {
+  const faturat = brendaFushes(gjendja.faturat, kompaniaId).filter((f) => {
+    if (f.statusi === 'anuluar') return false
+    if (opsionet.nga && f.dataLeshimit < opsionet.nga) return false
+    if (opsionet.deri && f.dataLeshimit > opsionet.deri) return false
     return true
   })
-  const sales = invoices.filter((i) => i.kind === 'sale')
-  const purchases = invoices.filter((i) => i.kind === 'purchase')
+  const shitjet = faturat.filter((f) => f.lloji === 'shitje')
+  const blerjet = faturat.filter((f) => f.lloji === 'blerje')
 
-  let revenue = 0
-  let cogs = 0
-  let vatOutput = 0
-  let receivables = 0
-  let unpaidInvoiceCount = 0
-  let overdueInvoiceCount = 0
-  for (const inv of sales) {
-    const t = invoiceTotals(state, inv)
-    revenue += t.baseNet
-    vatOutput += t.baseVat
-    cogs += invoiceCogs(state, inv)
-    receivables += t.baseOutstanding
-    if (t.outstanding > 0) {
-      unpaidInvoiceCount++
-      if (inv.dueDate < today) overdueInvoiceCount++
+  let teArdhura = 0
+  let kosto = 0
+  let tvshDalese = 0
+  let teArketueshme = 0
+  let numriFaturaveTePapaguara = 0
+  let numriFaturaveMbiAfat = 0
+  for (const fatura of shitjet) {
+    const t = totaletFatures(gjendja, fatura)
+    teArdhura += t.netoBaze
+    tvshDalese += t.tvshBaze
+    kosto += kostoFatures(gjendja, fatura)
+    teArketueshme += t.mberturBaze
+    if (t.mbetur > 0) {
+      numriFaturaveTePapaguara++
+      if (fatura.dataAfatit < sot) numriFaturaveMbiAfat++
     }
   }
 
-  let vatInput = 0
-  let payables = 0
-  for (const inv of purchases) {
-    const t = invoiceTotals(state, inv)
-    vatInput += t.baseVat
-    payables += t.baseOutstanding
+  let tvshZbritese = 0
+  let tePagueshme = 0
+  for (const fatura of blerjet) {
+    const t = totaletFatures(gjendja, fatura)
+    tvshZbritese += t.tvshBaze
+    tePagueshme += t.mberturBaze
   }
 
-  // Operating expenses (approved only) within range
-  const expenses = inScope(state.expenses, companyId).filter((e) => {
-    if (e.status !== 'approved') return false
-    if (opts.from && e.date < opts.from) return false
-    if (opts.to && e.date > opts.to) return false
+  // Shpenzimet operative (vetëm të aprovuara) brenda intervalit
+  const shpenzimet = brendaFushes(gjendja.shpenzimet, kompaniaId).filter((sh) => {
+    if (sh.statusi !== 'aprovuar') return false
+    if (opsionet.nga && sh.data < opsionet.nga) return false
+    if (opsionet.deri && sh.data > opsionet.deri) return false
     return true
   })
-  let operatingExpenses = 0
-  let depreciation = 0
-  for (const e of expenses) {
-    const base = toBase(state, e.amount, e.currency, e.exchangeRate)
-    operatingExpenses += base
+  let shpenzimeOperative = 0
+  for (const sh of shpenzimet) {
+    shpenzimeOperative += neBaze(gjendja, sh.shuma, sh.monedha, sh.kursiKembimit)
   }
-  // Treat a portion of equipment as depreciation for the P&L demo
-  depreciation = inScope(state.expenses, companyId)
-    .filter((e) => e.category === 'equipment' && e.status === 'approved')
-    .reduce((s, e) => s + toBase(state, e.amount, e.currency, e.exchangeRate) * 0.2, 0)
+  // Trajtojmë një pjesë të pajisjeve si amortizim për demonstrimin e P&L-së
+  const amortizimi = brendaFushes(gjendja.shpenzimet, kompaniaId)
+    .filter((sh) => sh.kategoria === 'pajisje' && sh.statusi === 'aprovuar')
+    .reduce((s, sh) => s + neBaze(gjendja, sh.shuma, sh.monedha, sh.kursiKembimit) * 0.2, 0)
 
-  const grossProfit = revenue - cogs
-  const ebitda = grossProfit - operatingExpenses
-  const netProfit = ebitda - depreciation
+  const fitimiBruto = teArdhura - kosto
+  const ebitda = fitimiBruto - shpenzimeOperative
+  const fitimiNeto = ebitda - amortizimi
 
-  // Cash & bank balances (opening + net movements)
-  const cashBalance = cashBalanceTotal(state, companyId)
-  const bankBalance = bankBalanceTotal(state, companyId)
+  // Balancat e arkës & bankës (fillestare + lëvizjet neto)
+  const balancaArkes = totaliArkes(gjendja, kompaniaId)
+  const balancaBankes = totaliBankes(gjendja, kompaniaId)
 
-  const inventoryValue = inScope(state.products, companyId).reduce(
-    (s, p) => s + p.stock * p.cost,
+  const vleraStokut = brendaFushes(gjendja.produktet, kompaniaId).reduce(
+    (s, p) => s + p.stoku * p.kostoja,
     0,
   )
 
   return {
-    revenue,
-    cogs,
-    grossProfit,
-    operatingExpenses,
+    teArdhura,
+    kosto,
+    fitimiBruto,
+    shpenzimeOperative,
     ebitda,
-    depreciation,
-    netProfit,
-    receivables,
-    payables,
-    cashBalance,
-    bankBalance,
-    vatOutput,
-    vatInput,
-    vatPayable: vatOutput - vatInput,
-    inventoryValue,
-    unpaidInvoiceCount,
-    overdueInvoiceCount,
+    amortizimi,
+    fitimiNeto,
+    teArketueshme,
+    tePagueshme,
+    balancaArkes,
+    balancaBankes,
+    tvshDalese,
+    tvshZbritese,
+    tvshPerPagese: tvshDalese - tvshZbritese,
+    vleraStokut,
+    numriFaturaveTePapaguara,
+    numriFaturaveMbiAfat,
   }
 }
 
 // ---------------------------------------------------------------------------
-// Cash / bank balances
+// Balancat e arkës / bankës
 // ---------------------------------------------------------------------------
-export function cashBalanceTotal(state: FinanceState, companyId: string): number {
-  const registers = inScope(state.cashRegisters, companyId)
-  return registers.reduce((sum, reg) => sum + cashRegisterBalance(state, reg.id), 0)
+export function totaliArkes(gjendja: GjendjaFinanca, kompaniaId: string): number {
+  const arkat = brendaFushes(gjendja.arkat, kompaniaId)
+  return arkat.reduce((shuma, arka) => shuma + balancaArkes(gjendja, arka.id), 0)
 }
 
-export function cashRegisterBalance(state: FinanceState, registerId: string): number {
-  const reg = state.cashRegisters.find((r) => r.id === registerId)
-  if (!reg) return 0
-  let balance = toBase(state, reg.openingBalance, reg.currency)
-  for (const p of state.payments) {
-    if (p.cashRegisterId !== registerId) continue
-    const base = toBase(state, p.amount, p.currency, p.exchangeRate)
-    balance += p.direction === 'in' ? base : -base
+export function balancaArkes(gjendja: GjendjaFinanca, arkaId: string): number {
+  const arka = gjendja.arkat.find((a) => a.id === arkaId)
+  if (!arka) return 0
+  let balanca = neBaze(gjendja, arka.balancaFillestare, arka.monedha)
+  for (const p of gjendja.pagesat) {
+    if (p.arkaId !== arkaId) continue
+    const baze = neBaze(gjendja, p.shuma, p.monedha, p.kursiKembimit)
+    balanca += p.drejtimi === 'hyrje' ? baze : -baze
   }
-  // cash expenses reduce the register's company cash (approx: apply to main register)
-  return balance
+  return balanca
 }
 
-export function bankBalanceTotal(state: FinanceState, companyId: string): number {
-  const banks = inScope(state.bankAccounts, companyId)
-  return banks.reduce((sum, b) => sum + bankAccountBalance(state, b.id), 0)
+export function totaliBankes(gjendja: GjendjaFinanca, kompaniaId: string): number {
+  const bankat = brendaFushes(gjendja.llogariteBankare, kompaniaId)
+  return bankat.reduce((shuma, b) => shuma + balancaLlogarise(gjendja, b.id), 0)
 }
 
-export function bankAccountBalance(state: FinanceState, bankId: string): number {
-  const bank = state.bankAccounts.find((b) => b.id === bankId)
-  if (!bank) return 0
-  let balance = toBase(state, bank.openingBalance, bank.currency)
-  for (const p of state.payments) {
-    if (p.bankAccountId !== bankId) continue
-    const base = toBase(state, p.amount, p.currency, p.exchangeRate)
-    balance += p.direction === 'in' ? base : -base
+export function balancaLlogarise(gjendja: GjendjaFinanca, bankaId: string): number {
+  const banka = gjendja.llogariteBankare.find((b) => b.id === bankaId)
+  if (!banka) return 0
+  let balanca = neBaze(gjendja, banka.balancaFillestare, banka.monedha)
+  for (const p of gjendja.pagesat) {
+    if (p.llogariaBankareId !== bankaId) continue
+    const baze = neBaze(gjendja, p.shuma, p.monedha, p.kursiKembimit)
+    balanca += p.drejtimi === 'hyrje' ? baze : -baze
   }
-  return balance
+  return balanca
 }
 
 // ---------------------------------------------------------------------------
-// Monthly revenue / expense series (for charts)
+// Seria mujore e të ardhurave / shpenzimeve (për grafikët)
 // ---------------------------------------------------------------------------
-export interface MonthlyPoint {
-  month: string
-  revenue: number
-  expenses: number
-  profit: number
+export interface PikeMujore {
+  muaji: string
+  teArdhura: number
+  shpenzime: number
+  fitimi: number
 }
 
-export function monthlySeries(
-  state: FinanceState,
-  companyId: string,
-  year = '2026',
-): MonthlyPoint[] {
-  const months = Array.from({ length: 12 }, (_, i) =>
-    `${year}-${String(i + 1).padStart(2, '0')}`,
+export function seriaMujore(
+  gjendja: GjendjaFinanca,
+  kompaniaId: string,
+  viti = '2026',
+): PikeMujore[] {
+  const muajt = Array.from({ length: 12 }, (_, i) =>
+    `${viti}-${String(i + 1).padStart(2, '0')}`,
   )
-  const map = new Map<string, MonthlyPoint>(
-    months.map((m) => [m, { month: m, revenue: 0, expenses: 0, profit: 0 }]),
+  const harta = new Map<string, PikeMujore>(
+    muajt.map((m) => [m, { muaji: m, teArdhura: 0, shpenzime: 0, fitimi: 0 }]),
   )
 
-  for (const inv of inScope(state.invoices, companyId)) {
-    if (inv.kind !== 'sale' || inv.status === 'cancelled') continue
-    const key = monthKey(inv.issueDate)
-    const point = map.get(key)
-    if (!point) continue
-    point.revenue += invoiceTotals(state, inv).baseNet
+  for (const fatura of brendaFushes(gjendja.faturat, kompaniaId)) {
+    if (fatura.lloji !== 'shitje' || fatura.statusi === 'anuluar') continue
+    const celesi = celesiMuajit(fatura.dataLeshimit)
+    const pika = harta.get(celesi)
+    if (!pika) continue
+    pika.teArdhura += totaletFatures(gjendja, fatura).netoBaze
   }
-  for (const e of inScope(state.expenses, companyId)) {
-    if (e.status !== 'approved') continue
-    const key = monthKey(e.date)
-    const point = map.get(key)
-    if (!point) continue
-    point.expenses += toBase(state, e.amount, e.currency, e.exchangeRate)
+  for (const sh of brendaFushes(gjendja.shpenzimet, kompaniaId)) {
+    if (sh.statusi !== 'aprovuar') continue
+    const celesi = celesiMuajit(sh.data)
+    const pika = harta.get(celesi)
+    if (!pika) continue
+    pika.shpenzime += neBaze(gjendja, sh.shuma, sh.monedha, sh.kursiKembimit)
   }
-  // Add COGS into expenses for the profit line
-  for (const inv of inScope(state.invoices, companyId)) {
-    if (inv.kind !== 'sale' || inv.status === 'cancelled') continue
-    const key = monthKey(inv.issueDate)
-    const point = map.get(key)
-    if (!point) continue
-    point.expenses += invoiceCogs(state, inv)
+  // Shtojmë COGS-në te shpenzimet për vijën e fitimit
+  for (const fatura of brendaFushes(gjendja.faturat, kompaniaId)) {
+    if (fatura.lloji !== 'shitje' || fatura.statusi === 'anuluar') continue
+    const celesi = celesiMuajit(fatura.dataLeshimit)
+    const pika = harta.get(celesi)
+    if (!pika) continue
+    pika.shpenzime += kostoFatures(gjendja, fatura)
   }
-  for (const p of map.values()) p.profit = p.revenue - p.expenses
-  return months.map((m) => map.get(m)!)
+  for (const p of harta.values()) p.fitimi = p.teArdhura - p.shpenzime
+  return muajt.map((m) => harta.get(m)!)
 }
 
 // ---------------------------------------------------------------------------
-// Customer & supplier statements
+// Kartelat e klientit & furnitorit
 // ---------------------------------------------------------------------------
-export interface PartyStatement {
-  invoiced: number
-  paid: number
-  balance: number
-  invoiceCount: number
+export interface KartelaPales {
+  faturuar: number
+  paguar: number
+  balanca: number
+  numriFaturave: number
 }
 
-export function customerStatement(
-  state: FinanceState,
-  customerId: string,
-): PartyStatement {
-  const invs = state.invoices.filter(
-    (i) => i.kind === 'sale' && i.partyId === customerId && i.status !== 'cancelled',
+export function kartelaKlientit(
+  gjendja: GjendjaFinanca,
+  klientiId: string,
+): KartelaPales {
+  const faturat = gjendja.faturat.filter(
+    (f) => f.lloji === 'shitje' && f.palaId === klientiId && f.statusi !== 'anuluar',
   )
-  let invoiced = 0
-  let paid = 0
-  for (const inv of invs) {
-    const t = invoiceTotals(state, inv)
-    invoiced += t.baseTotal
-    paid += inv.paidAmount * (inv.exchangeRate || 1)
+  let faturuar = 0
+  let paguar = 0
+  for (const fatura of faturat) {
+    const t = totaletFatures(gjendja, fatura)
+    faturuar += t.totaliBaze
+    paguar += fatura.shumaPaguar * (fatura.kursiKembimit || 1)
   }
-  return { invoiced, paid, balance: invoiced - paid, invoiceCount: invs.length }
+  return { faturuar, paguar, balanca: faturuar - paguar, numriFaturave: faturat.length }
 }
 
-export function supplierStatement(
-  state: FinanceState,
-  supplierId: string,
-): PartyStatement {
-  const invs = state.invoices.filter(
-    (i) => i.kind === 'purchase' && i.partyId === supplierId && i.status !== 'cancelled',
+export function kartelaFurnitorit(
+  gjendja: GjendjaFinanca,
+  furnitoriId: string,
+): KartelaPales {
+  const faturat = gjendja.faturat.filter(
+    (f) => f.lloji === 'blerje' && f.palaId === furnitoriId && f.statusi !== 'anuluar',
   )
-  let invoiced = 0
-  let paid = 0
-  for (const inv of invs) {
-    const t = invoiceTotals(state, inv)
-    invoiced += t.baseTotal
-    paid += inv.paidAmount * (inv.exchangeRate || 1)
+  let faturuar = 0
+  let paguar = 0
+  for (const fatura of faturat) {
+    const t = totaletFatures(gjendja, fatura)
+    faturuar += t.totaliBaze
+    paguar += fatura.shumaPaguar * (fatura.kursiKembimit || 1)
   }
-  return { invoiced, paid, balance: invoiced - paid, invoiceCount: invs.length }
+  return { faturuar, paguar, balanca: faturuar - paguar, numriFaturave: faturat.length }
 }
 
 // ---------------------------------------------------------------------------
-// Reports: P&L, Balance Sheet, Cashflow
+// Raportet: P&L, Bilanci, Cashflow
 // ---------------------------------------------------------------------------
-export interface BalanceSheet {
-  // assets
-  bank: number
-  cash: number
-  receivables: number
-  inventory: number
-  totalAssets: number
-  // liabilities
-  payables: number
-  vatPayable: number
-  totalLiabilities: number
-  // equity
-  equity: number
+export interface Bilanci {
+  // asetet
+  banka: number
+  arka: number
+  teArketueshme: number
+  inventar: number
+  totaliAseteve: number
+  // detyrimet
+  tePagueshme: number
+  tvshPerPagese: number
+  totaliDetyrimeve: number
+  // kapitali
+  kapitali: number
 }
 
-export function balanceSheet(state: FinanceState, companyId: string): BalanceSheet {
-  const s = summary(state, companyId)
-  const bank = s.bankBalance
-  const cash = s.cashBalance
-  const receivables = s.receivables
-  const inventory = s.inventoryValue
-  const totalAssets = bank + cash + receivables + inventory
-  const payables = s.payables
-  const vatPayable = Math.max(0, s.vatPayable)
-  const totalLiabilities = payables + vatPayable
-  const equity = totalAssets - totalLiabilities
+export function bilanci(gjendja: GjendjaFinanca, kompaniaId: string): Bilanci {
+  const p = permbledhje(gjendja, kompaniaId)
+  const banka = p.balancaBankes
+  const arka = p.balancaArkes
+  const teArketueshme = p.teArketueshme
+  const inventar = p.vleraStokut
+  const totaliAseteve = banka + arka + teArketueshme + inventar
+  const tePagueshme = p.tePagueshme
+  const tvshPerPagese = Math.max(0, p.tvshPerPagese)
+  const totaliDetyrimeve = tePagueshme + tvshPerPagese
+  const kapitali = totaliAseteve - totaliDetyrimeve
   return {
-    bank,
-    cash,
-    receivables,
-    inventory,
-    totalAssets,
-    payables,
-    vatPayable,
-    totalLiabilities,
-    equity,
+    banka,
+    arka,
+    teArketueshme,
+    inventar,
+    totaliAseteve,
+    tePagueshme,
+    tvshPerPagese,
+    totaliDetyrimeve,
+    kapitali,
   }
 }
 
-export interface Cashflow {
-  inflow: number
-  outflow: number
-  operating: number
-  upcomingReceivables: number
-  upcomingPayables: number
+export interface FluksiParase {
+  hyrje: number
+  dalje: number
+  operativ: number
+  teArketueshmeTeArdhshme: number
+  detyrimeTeArdhshme: number
 }
 
-export function cashflow(state: FinanceState, companyId: string): Cashflow {
-  const payments = inScope(state.payments, companyId)
-  let inflow = 0
-  let outflow = 0
-  for (const p of payments) {
-    const base = toBase(state, p.amount, p.currency, p.exchangeRate)
-    if (p.direction === 'in') inflow += base
-    else outflow += base
+export function fluksiParase(gjendja: GjendjaFinanca, kompaniaId: string): FluksiParase {
+  const pagesat = brendaFushes(gjendja.pagesat, kompaniaId)
+  let hyrje = 0
+  let dalje = 0
+  for (const p of pagesat) {
+    const baze = neBaze(gjendja, p.shuma, p.monedha, p.kursiKembimit)
+    if (p.drejtimi === 'hyrje') hyrje += baze
+    else dalje += baze
   }
-  const s = summary(state, companyId)
+  const p = permbledhje(gjendja, kompaniaId)
   return {
-    inflow,
-    outflow,
-    operating: inflow - outflow,
-    upcomingReceivables: s.receivables,
-    upcomingPayables: s.payables,
+    hyrje,
+    dalje,
+    operativ: hyrje - dalje,
+    teArketueshmeTeArdhshme: p.teArketueshme,
+    detyrimeTeArdhshme: p.tePagueshme,
   }
 }
 
 // ---------------------------------------------------------------------------
-// Helpers used by UI lists
+// Ndihmës që përdoren nga listat e UI-së
 // ---------------------------------------------------------------------------
-export function companyName(state: FinanceState, companyId: string): string {
-  return state.companies.find((c) => c.id === companyId)?.name ?? companyId
+export function emriKompanise(gjendja: GjendjaFinanca, kompaniaId: string): string {
+  return gjendja.kompanite.find((k) => k.id === kompaniaId)?.emri ?? kompaniaId
 }
 
-export function partyName(state: FinanceState, partyId: string): string {
-  const c = state.customers.find((x) => x.id === partyId)
-  if (c) return c.name
-  const s = state.suppliers.find((x) => x.id === partyId)
-  if (s) return s.name
-  return partyId
+export function emriPales(gjendja: GjendjaFinanca, palaId: string): string {
+  const klienti = gjendja.klientet.find((x) => x.id === palaId)
+  if (klienti) return klienti.emri
+  const furnitori = gjendja.furnitoret.find((x) => x.id === palaId)
+  if (furnitori) return furnitori.emri
+  return palaId
 }
 
-export function scoped<T extends { companyId: string }>(
-  rows: T[],
-  companyId: string,
+export function teFiltruara<T extends { kompaniaId: string }>(
+  rreshtat: T[],
+  kompaniaId: string,
 ): T[] {
-  return inScope(rows, companyId)
+  return brendaFushes(rreshtat, kompaniaId)
 }

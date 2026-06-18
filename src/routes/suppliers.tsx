@@ -2,38 +2,38 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import {
-  useFinanceState,
-  useCurrentCompanyId,
-  useFinanceActions,
-  supplierStatement,
-  scoped,
-  formatMoney,
+  usePerdorGjendjen,
+  useKompaniaAktualeId,
+  useVeprimetFinanca,
+  kartelaFurnitorit,
+  teFiltruara,
+  formatoPara,
 } from '../finance'
 import { PageHeader, Card, CardHeader, Table, Th, Td, Button, Money } from '../components/finance/ui'
 import { Modal, Field, Input } from '../components/finance/forms'
 
-function Suppliers() {
-  const state = useFinanceState()
-  const companyId = useCurrentCompanyId()
-  const actions = useFinanceActions()
-  const [open, setOpen] = useState(false)
-  const [form, setForm] = useState({ name: '', nipt: '', email: '', paymentTermsDays: '30' })
+function Furnitoret() {
+  const gjendja = usePerdorGjendjen()
+  const kompaniaId = useKompaniaAktualeId()
+  const veprimet = useVeprimetFinanca()
+  const [hapur, setHapur] = useState(false)
+  const [forma, setForma] = useState({ emri: '', nipt: '', email: '', afatiPagesesDite: '30' })
 
-  const targetCompany = companyId === 'grp' ? state.companies.find((c) => !c.isGroup)!.id : companyId
-  const list = scoped(state.suppliers, companyId)
+  const kompaniaSynuar = kompaniaId === 'grp' ? gjendja.kompanite.find((k) => !k.eshteGrup)!.id : kompaniaId
+  const lista = teFiltruara(gjendja.furnitoret, kompaniaId)
 
-  const submit = () => {
-    if (!form.name) return
-    actions.addSupplier({
-      companyId: targetCompany,
-      name: form.name,
-      nipt: form.nipt || undefined,
-      email: form.email || undefined,
-      paymentTermsDays: Number(form.paymentTermsDays) || 30,
-      active: true,
+  const ruaj = () => {
+    if (!forma.emri) return
+    veprimet.shtoFurnitor({
+      kompaniaId: kompaniaSynuar,
+      emri: forma.emri,
+      nipt: forma.nipt || undefined,
+      email: forma.email || undefined,
+      afatiPagesesDite: Number(forma.afatiPagesesDite) || 30,
+      aktiv: true,
     })
-    setForm({ name: '', nipt: '', email: '', paymentTermsDays: '30' })
-    setOpen(false)
+    setForma({ emri: '', nipt: '', email: '', afatiPagesesDite: '30' })
+    setHapur(false)
   }
 
   return (
@@ -41,10 +41,10 @@ function Suppliers() {
       <PageHeader
         title="Kartela e Furnitorit"
         subtitle="Fatura blerjeje, pagesa, detyrime të hapura dhe afate pagese."
-        actions={<Button onClick={() => setOpen(true)}><Plus className="w-4 h-4" /> Furnitor i ri</Button>}
+        actions={<Button onClick={() => setHapur(true)}><Plus className="w-4 h-4" /> Furnitor i ri</Button>}
       />
       <Card>
-        <CardHeader title={`${list.length} furnitorë`} />
+        <CardHeader title={`${lista.length} furnitorë`} />
         <Table
           head={
             <>
@@ -57,19 +57,19 @@ function Suppliers() {
             </>
           }
         >
-          {list.map((sup) => {
-            const st = supplierStatement(state, sup.id)
+          {lista.map((furnitori) => {
+            const kartela = kartelaFurnitorit(gjendja, furnitori.id)
             return (
-              <tr key={sup.id}>
+              <tr key={furnitori.id}>
                 <Td>
-                  <p className="font-medium text-slate-800">{sup.name}</p>
-                  <p className="text-xs text-slate-400">{sup.nipt ?? '—'}</p>
+                  <p className="font-medium text-slate-800">{furnitori.emri}</p>
+                  <p className="text-xs text-slate-400">{furnitori.nipt ?? '—'}</p>
                 </Td>
-                <Td className="text-xs text-slate-500">{sup.email}</Td>
-                <Td align="center">{sup.paymentTermsDays} ditë</Td>
-                <Td align="right"><Money amount={st.invoiced} /></Td>
-                <Td align="right"><Money amount={st.paid} /></Td>
-                <Td align="right"><span className={st.balance > 0 ? 'text-rose-600 font-medium' : 'text-slate-500'}>{formatMoney(st.balance)}</span></Td>
+                <Td className="text-xs text-slate-500">{furnitori.email}</Td>
+                <Td align="center">{furnitori.afatiPagesesDite} ditë</Td>
+                <Td align="right"><Money amount={kartela.faturuar} /></Td>
+                <Td align="right"><Money amount={kartela.paguar} /></Td>
+                <Td align="right"><span className={kartela.balanca > 0 ? 'text-rose-600 font-medium' : 'text-slate-500'}>{formatoPara(kartela.balanca)}</span></Td>
               </tr>
             )
           })}
@@ -77,20 +77,20 @@ function Suppliers() {
       </Card>
 
       <Modal
-        open={open}
-        onClose={() => setOpen(false)}
+        open={hapur}
+        onClose={() => setHapur(false)}
         title="Shto furnitor të ri"
-        footer={<><Button variant="secondary" onClick={() => setOpen(false)}>Anulo</Button><Button onClick={submit}>Ruaj</Button></>}
+        footer={<><Button variant="secondary" onClick={() => setHapur(false)}>Anulo</Button><Button onClick={ruaj}>Ruaj</Button></>}
       >
-        <Field label="Emri"><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></Field>
-        <Field label="NIPT / VAT"><Input value={form.nipt} onChange={(e) => setForm({ ...form, nipt: e.target.value })} /></Field>
-        <Field label="Email"><Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></Field>
-        <Field label="Afati i pagesës (ditë)"><Input type="number" value={form.paymentTermsDays} onChange={(e) => setForm({ ...form, paymentTermsDays: e.target.value })} /></Field>
+        <Field label="Emri"><Input value={forma.emri} onChange={(e) => setForma({ ...forma, emri: e.target.value })} /></Field>
+        <Field label="NIPT / VAT"><Input value={forma.nipt} onChange={(e) => setForma({ ...forma, nipt: e.target.value })} /></Field>
+        <Field label="Email"><Input value={forma.email} onChange={(e) => setForma({ ...forma, email: e.target.value })} /></Field>
+        <Field label="Afati i pagesës (ditë)"><Input type="number" value={forma.afatiPagesesDite} onChange={(e) => setForma({ ...forma, afatiPagesesDite: e.target.value })} /></Field>
       </Modal>
     </div>
   )
 }
 
 export const Route = createFileRoute('/suppliers')({
-  component: Suppliers,
+  component: Furnitoret,
 })

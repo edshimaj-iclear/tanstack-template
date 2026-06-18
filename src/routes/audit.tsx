@@ -1,11 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { ShieldCheck } from 'lucide-react'
-import { useFinanceState } from '../finance'
+import { usePerdorGjendjen } from '../finance'
 import { PageHeader, Card, CardHeader, Table, Th, Td } from '../components/finance/ui'
 
-function Audit() {
-  const state = useFinanceState()
-  const rows = [...state.auditLog].sort((a, b) => b.timestamp - a.timestamp)
+function Auditi() {
+  const gjendja = usePerdorGjendjen()
+  const rreshtat = [...gjendja.regjistriAuditit].sort((a, b) => b.koha - a.koha)
 
   return (
     <div>
@@ -14,7 +14,7 @@ function Audit() {
         subtitle="Çdo veprim financiar regjistrohet dhe nuk mund të fshihet."
       />
       <Card>
-        <CardHeader title={`${rows.length} veprime`} />
+        <CardHeader title={`${rreshtat.length} veprime`} />
         <Table
           head={
             <>
@@ -27,19 +27,19 @@ function Audit() {
             </>
           }
         >
-          {rows.map((e) => (
-            <tr key={e.id}>
-              <Td>{new Date(e.timestamp).toLocaleString('en-GB')}</Td>
-              <Td className="font-medium">{e.user}</Td>
+          {rreshtat.map((z) => (
+            <tr key={z.id}>
+              <Td>{new Date(z.koha).toLocaleString('en-GB')}</Td>
+              <Td className="font-medium">{z.perdoruesi}</Td>
               <Td>
                 <span className="inline-flex items-center gap-1.5">
                   <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
-                  {e.action}
+                  {z.veprimi}
                 </span>
               </Td>
-              <Td>{e.entity}</Td>
-              <Td>{e.after ?? '—'}</Td>
-              <Td className="text-xs text-slate-400">{e.ip} · {e.device}</Td>
+              <Td>{z.entiteti}</Td>
+              <Td>{z.pas ?? '—'}</Td>
+              <Td className="text-xs text-slate-400">{z.ip} · {z.pajisja}</Td>
             </tr>
           ))}
         </Table>
@@ -49,5 +49,5 @@ function Audit() {
 }
 
 export const Route = createFileRoute('/audit')({
-  component: Audit,
+  component: Auditi,
 })
