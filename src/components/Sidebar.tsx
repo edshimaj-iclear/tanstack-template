@@ -1,104 +1,85 @@
-import { PlusCircle, MessageCircle, Trash2, Edit2 } from 'lucide-react';
+"use client";
 
-interface SidebarProps {
-  conversations: Array<{ id: string; title: string }>;
-  currentConversationId: string | null;
-  handleNewChat: () => void;
-  setCurrentConversationId: (id: string) => void;
-  handleDeleteChat: (id: string) => void;
-  editingChatId: string | null;
-  setEditingChatId: (id: string | null) => void;
-  editingTitle: string;
-  setEditingTitle: (title: string) => void;
-  handleUpdateChatTitle: (id: string, title: string) => void;
-}
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-export const Sidebar = ({ 
-  conversations, 
-  currentConversationId, 
-  handleNewChat, 
-  setCurrentConversationId, 
-  handleDeleteChat, 
-  editingChatId, 
-  setEditingChatId, 
-  editingTitle, 
-  setEditingTitle, 
-  handleUpdateChatTitle 
-}: SidebarProps) => (
-  <div className="flex flex-col w-64 bg-gray-800 border-r border-gray-700">
-    <div className="p-4 border-b border-gray-700">
-      <button
-        onClick={handleNewChat}
-        className="flex items-center justify-center w-full gap-2 px-3 py-2 text-sm font-medium text-white rounded-lg bg-gradient-to-r from-orange-500 to-red-600 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-orange-500"
-      >
-        <PlusCircle className="w-4 h-4" />
-        New Chat
-      </button>
-    </div>
+type Item = { href: string; label: string; soon?: boolean };
+type Group = { title: string; items: Item[] };
 
-    {/* Chat List */}
-    <div className="flex-1 overflow-y-auto">
-      {conversations.map((chat) => (
-        <div
-          key={chat.id}
-          className={`group flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-700/50 ${
-            chat.id === currentConversationId ? 'bg-gray-700/50' : ''
-          }`}
-          onClick={() => setCurrentConversationId(chat.id)}
-        >
-          <MessageCircle className="w-4 h-4 text-gray-400" />
-          {editingChatId === chat.id ? (
-            <input
-              type="text"
-              value={editingTitle}
-              onChange={(e) => setEditingTitle(e.target.value)}
-              onFocus={(e) => e.target.select()}
-              onBlur={() => {
-                if (editingTitle.trim()) {
-                  handleUpdateChatTitle(chat.id, editingTitle)
-                }
-                setEditingChatId(null)
-                setEditingTitle('')
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && editingTitle.trim()) {
-                  handleUpdateChatTitle(chat.id, editingTitle)
-                } else if (e.key === 'Escape') {
-                  setEditingChatId(null)
-                  setEditingTitle('')
-                }
-              }}
-              className="flex-1 text-sm text-white bg-transparent focus:outline-none"
-              autoFocus
-            />
-          ) : (
-            <span className="flex-1 text-sm text-gray-300 truncate">
-              {chat.title}
-            </span>
-          )}
-          <div className="items-center hidden gap-1 group-hover:flex">
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                setEditingChatId(chat.id)
-                setEditingTitle(chat.title)
-              }}
-              className="p-1 text-gray-400 hover:text-white"
-            >
-              <Edit2 className="w-3 h-3" />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                handleDeleteChat(chat.id)
-              }}
-              className="p-1 text-gray-400 hover:text-red-500"
-            >
-              <Trash2 className="w-3 h-3" />
-            </button>
+const groups: Group[] = [
+  {
+    title: "Përmbledhje",
+    items: [
+      { href: "/dashboard", label: "Paneli" },
+    ],
+  },
+  {
+    title: "Prodhimi",
+    items: [
+      { href: "/cases", label: "Rastet (Pranim)" },
+      { href: "/production", label: "Linja e Prodhimit" },
+      { href: "/qc", label: "Kontroll Cilësie" },
+      { href: "/shipping", label: "Dërgesat" },
+    ],
+  },
+  {
+    title: "Cilësia",
+    items: [
+      { href: "/capa", label: "CAPA" },
+      { href: "/complaints", label: "Ankesat" },
+      { href: "/risk", label: "Menaxhimi i Riskut" },
+      { href: "/audits", label: "Auditimet" },
+      { href: "/management-review", label: "Rishikimi i Menaxhimit" },
+    ],
+  },
+  {
+    title: "Burimet",
+    items: [
+      { href: "/suppliers", label: "Furnitorët & Lot-et" },
+      { href: "/equipment", label: "Pajisjet" },
+      { href: "/training", label: "Trajnimet" },
+      { href: "/documents", label: "Dokumentet (SOP)" },
+    ],
+  },
+];
+
+export function Sidebar() {
+  const pathname = usePathname();
+  return (
+    <aside className="w-60 shrink-0 border-r border-line bg-surface min-h-screen sticky top-0 hidden md:flex md:flex-col">
+      <div className="px-5 h-16 flex items-center border-b border-line">
+        <Link href="/dashboard" className="flex items-center gap-2.5">
+          <span className="grid h-7 w-7 place-items-center rounded-md bg-clinic-500 text-white font-display font-bold text-sm">iC</span>
+          <span className="font-display font-semibold tracking-tight">iClear<span className="text-clinic-500"> QMS</span></span>
+        </Link>
+      </div>
+      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-5">
+        {groups.map((g) => (
+          <div key={g.title}>
+            <div className="label px-2 mb-1.5">{g.title}</div>
+            <div className="space-y-0.5">
+              {g.items.map((it) => {
+                const active = pathname === it.href || pathname.startsWith(it.href + "/");
+                return (
+                  <Link
+                    key={it.href}
+                    href={it.soon ? "#" : it.href}
+                    className={`group flex items-center justify-between rounded-lg px-2.5 py-1.5 text-sm transition-colors ${
+                      active ? "bg-clinic-50 text-clinic-700 font-medium" : "text-muted hover:bg-canvas hover:text-ink"
+                    } ${it.soon ? "pointer-events-none opacity-55" : ""}`}
+                  >
+                    <span>{it.label}</span>
+                    {it.soon && <span className="text-[10px] font-mono uppercase tracking-wide text-faint">së shpejti</span>}
+                  </Link>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      ))}
-    </div>
-  </div>
-); 
+        ))}
+      </nav>
+      <div className="px-4 py-3 border-t border-line text-[11px] text-faint font-mono">
+        v0.1 · ISO 13485 ready
+      </div>
+    </aside>
+  );
+}

@@ -1,0 +1,307 @@
+// iClear QMS — Data model
+// SQLite for local/dev. To go to production: switch provider to "postgresql"
+// and set DATABASE_URL to a hosted Postgres (Neon/Supabase/Railway).
+// "Enum" fields are stored as String for SQLite portability; allowed values
+// are defined in src/lib/constants.ts.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ── People & access ──────────────────────────────────────────────
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         String   @default("OPERATOR") // CEO, QUALITY_MANAGER, TECHNICAL_DIRECTOR, OPERATOR, QC, SALES
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  casesCreated     Case[]            @relation("CaseCreatedBy")
+  steps            ProductionStep[]
+  inspections      QcInspection[]
+  capasOwned       Capa[]
+  trainings        TrainingRecord[]  @relation("Trainee")
+  trainingsGiven   TrainingRecord[]  @relation("Trainer")
+  equipmentEvents  EquipmentEvent[]
+  audits           Audit[]
+  auditLogs        AuditLog[]
+  shipmentsReleased Shipment[]
+  documentsOwned   Document[]
+}
+
+// ── Module 1 + central entity: Case ─────────────────────────────
+model Case {
+  id           String   @id @default(cuid())
+  caseNumber   String   @unique
+  patientRef   String   // anonymized patient reference (no PII)
+  doctorName   String
+  doctorClinic String?
+  stlVersion   String?
+  alignerCount Int      @default(0)
+  priority     String   @default("NORMAL") // NORMAL, RUSH
+  stage        String   @default("RECEIVED") // see STAGES
+  status       String   @default("OPEN")     // OPEN, IN_PRODUCTION, ON_HOLD, COMPLETED, SHIPPED, CANCELLED
+  holdReason   String?
+  notes        String?
+  dueDate      DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  createdById  String
+  createdBy    User     @relation("CaseCreatedBy", fields: [createdById], references: [id])
+
+  steps        ProductionStep[]
+  inspections  QcInspection[]
+  complaints   Complaint[]
+  capas        Capa[]
+  shipment     Shipment?
+}
+
+// ── Production / DHR: every step logged ─────────────────────────
+model ProductionStep {
+  id           String   @id @default(cuid())
+  caseId       String
+  case         Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  stage        String   // RECEIVED, DESIGN, PLAN_APPROVAL, PRINTING, POST_PROCESS, THERMOFORMING, TRIMMING, LASER_MARKING, FINAL_QC, PACKAGING, SHIPPING
+  status       String   @default("PENDING") // PENDING, IN_PROGRESS, PASSED, FAILED, HOLD
+  operatorId   String?
+  operator     User?    @relation(fields: [operatorId], references: [id])
+  equipmentId  String?
+  equipment    Equipment? @relation(fields: [equipmentId], references: [id])
+  materialLotId String?
+  materialLot  MaterialLot? @relation(fields: [materialLotId], references: [id])
+  parameters   String?  // JSON: e.g. layer height, exposure, temp, vacuum, etc.
+  notes        String?
+  startedAt    DateTime?
+  completedAt  DateTime?
+  createdAt    DateTime @default(now())
+
+  inspections  QcInspection[]
+}
+
+// ── QC inspections (incoming / in-process / final) ──────────────
+model QcInspection {
+  id         String   @id @default(cuid())
+  caseId     String?
+  case       Case?    @relation(fields: [caseId], references: [id])
+  stepId     String?
+  step       ProductionStep? @relation(fields: [stepId], references: [id])
+  type       String   // INCOMING, IN_PROCESS, FINAL
+  result     String   // PASS, FAIL, CONDITIONAL
+  checklist  String?  // JSON of checkpoints + outcomes
+  defects    String?  // JSON list
+  photoNotes String?
+  inspectorId String
+  inspector  User     @relation(fields: [inspectorId], references: [id])
+  eSignature String?  // name + timestamp signature string
+  signedAt   DateTime @default(now())
+}
+
+// ── Module 11/12: Suppliers, Materials, Lots ────────────────────
+model Supplier {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  type      String   // RESIN, FILM, PACKAGING, OTHER
+  status    String   @default("PENDING") // PENDING, APPROVED, SUSPENDED
+  score     Int?     // 0-100 performance score
+  certificate String?
+  createdAt DateTime @default(now())
+
+  materials Material[]
+  lots      MaterialLot[]
+}
+
+model Material {
+  id         String   @id @default(cuid())
+  code       String   @unique
+  name       String
+  type       String   // RESIN, THERMOFORM_FILM, PACKAGING
+  supplierId String?
+  supplier   Supplier? @relation(fields: [supplierId], references: [id])
+  specs      String?  // JSON
+
+  lots       MaterialLot[]
+}
+
+model MaterialLot {
+  id          String   @id @default(cuid())
+  lotNumber   String
+  materialId  String
+  material    Material @relation(fields: [materialId], references: [id])
+  supplierId  String?
+  supplier    Supplier? @relation(fields: [supplierId], references: [id])
+  receivedAt  DateTime @default(now())
+  expiryDate  DateTime?
+  quantity    Float?
+  qtyRemaining Float?
+  status      String   @default("QUARANTINE") // QUARANTINE, ACCEPTED, REJECTED, EXPIRED
+  certificate String?
+  createdAt   DateTime @default(now())
+
+  steps       ProductionStep[]
+}
+
+// ── Module 10: Equipment ────────────────────────────────────────
+model Equipment {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  type      String   // PRINTER, WASHER, CURE, THERMOFORMER, LASER, OTHER
+  location  String?
+  status    String   @default("OPERATIONAL") // OPERATIONAL, MAINTENANCE, DOWN
+  installedAt DateTime?
+  createdAt DateTime @default(now())
+
+  events    EquipmentEvent[]
+  steps     ProductionStep[]
+}
+
+model EquipmentEvent {
+  id          String   @id @default(cuid())
+  equipmentId String
+  equipment   Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  type        String   // IQ, OQ, PQ, CALIBRATION, MAINTENANCE
+  date        DateTime @default(now())
+  performedById String?
+  performedBy User?    @relation(fields: [performedById], references: [id])
+  notes       String?
+  nextDue     DateTime?
+}
+
+// ── Module 7: CAPA ──────────────────────────────────────────────
+model Capa {
+  id           String   @id @default(cuid())
+  capaNumber   String   @unique
+  source       String   // COMPLAINT, AUDIT, INTERNAL, KPI
+  caseId       String?
+  case         Case?    @relation(fields: [caseId], references: [id])
+  description  String
+  rootCause    String?
+  correctiveAction String?
+  preventiveAction String?
+  status       String   @default("OPEN") // OPEN, INVESTIGATION, IN_PROGRESS, VERIFICATION, CLOSED
+  ownerId      String?
+  owner        User?    @relation(fields: [ownerId], references: [id])
+  openedAt     DateTime @default(now())
+  closedAt     DateTime?
+
+  complaints   Complaint[]
+}
+
+// ── Module 15: Complaints ───────────────────────────────────────
+model Complaint {
+  id          String   @id @default(cuid())
+  complaintNumber String @unique
+  caseId      String?
+  case        Case?    @relation(fields: [caseId], references: [id])
+  doctorName  String
+  description String
+  decision    String?
+  status      String   @default("OPEN") // OPEN, INVESTIGATION, DECISION, CLOSED
+  capaId      String?
+  capa        Capa?    @relation(fields: [capaId], references: [id])
+  openedAt    DateTime @default(now())
+  closedAt    DateTime?
+}
+
+// ── Module 8: Risk register ─────────────────────────────────────
+model Risk {
+  id          String   @id @default(cuid())
+  process     String
+  hazard      String
+  probability Int      // 1-5
+  severity    Int      // 1-5
+  riskScore   Int      // probability * severity
+  action      String?
+  owner       String?
+  status      String   @default("OPEN") // OPEN, MITIGATED, ACCEPTED
+  reviewDate  DateTime?
+  createdAt   DateTime @default(now())
+}
+
+// ── Module 9: Training matrix ───────────────────────────────────
+model TrainingRecord {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation("Trainee", fields: [userId], references: [id], onDelete: Cascade)
+  competency String   // STL, PRINTER, CURE, THERMO, QC, SHIPPING
+  level      String   @default("NONE") // NONE, TRAINING, QUALIFIED
+  trainedAt  DateTime?
+  trainerId  String?
+  trainer    User?    @relation("Trainer", fields: [trainerId], references: [id])
+  expiresAt  DateTime?
+
+  @@unique([userId, competency])
+}
+
+// ── Module 16: Internal audits ──────────────────────────────────
+model Audit {
+  id         String   @id @default(cuid())
+  auditNumber String  @unique
+  area       String   // SALES, PRODUCTION, QC, SHIPPING, DOCUMENTATION, TRACEABILITY, TRAINING
+  date       DateTime @default(now())
+  auditorId  String?
+  auditor    User?    @relation(fields: [auditorId], references: [id])
+  findings   String?  // JSON
+  status     String   @default("OPEN") // OPEN, CLOSED
+}
+
+// ── Module 17: Management review ────────────────────────────────
+model ManagementReview {
+  id          String   @id @default(cuid())
+  date        DateTime @default(now())
+  attendees   String?
+  kpiSnapshot String?  // JSON
+  decisions   String?
+  actions     String?
+  nextReviewDate DateTime?
+}
+
+// ── Module 4: Controlled documents (QM/SOP/WI/FRM/REC/POL) ───────
+model Document {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  type        String   // QM, SOP, WI, FRM, REC, POL
+  title       String
+  version     String   @default("1.0")
+  status      String   @default("DRAFT") // DRAFT, REVIEW, APPROVED, OBSOLETE
+  content     String?
+  ownerId     String?
+  owner       User?    @relation(fields: [ownerId], references: [id])
+  effectiveDate DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ── Shipping ────────────────────────────────────────────────────
+model Shipment {
+  id           String   @id @default(cuid())
+  caseId       String   @unique
+  case         Case     @relation(fields: [caseId], references: [id])
+  trackingNumber String?
+  carrier      String?
+  shippedAt    DateTime?
+  releasedById String?
+  releasedBy   User?    @relation(fields: [releasedById], references: [id])
+  createdAt    DateTime @default(now())
+}
+
+// ── System audit trail (21 CFR Part 11 style) ───────────────────
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String   // CREATE, UPDATE, ADVANCE, RELEASE, LOGIN, etc.
+  entity    String   // Case, ProductionStep, Document, ...
+  entityId  String?
+  details   String?  // JSON
+  createdAt DateTime @default(now())
+}
