@@ -11,13 +11,48 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as PipelineImport } from './routes/pipeline'
+import { Route as AssistantImport } from './routes/assistant'
 import { Route as IndexImport } from './routes/index'
+import { Route as ContactsIndexImport } from './routes/contacts/index'
+import { Route as AccountsIndexImport } from './routes/accounts/index'
+import { Route as AccountsAccountIdImport } from './routes/accounts/$accountId'
 
 // Create/Update Routes
+
+const PipelineRoute = PipelineImport.update({
+  id: '/pipeline',
+  path: '/pipeline',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AssistantRoute = AssistantImport.update({
+  id: '/assistant',
+  path: '/assistant',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ContactsIndexRoute = ContactsIndexImport.update({
+  id: '/contacts/',
+  path: '/contacts/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AccountsIndexRoute = AccountsIndexImport.update({
+  id: '/accounts/',
+  path: '/accounts/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AccountsAccountIdRoute = AccountsAccountIdImport.update({
+  id: '/accounts/$accountId',
+  path: '/accounts/$accountId',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -32,6 +67,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
+    '/assistant': {
+      id: '/assistant'
+      path: '/assistant'
+      fullPath: '/assistant'
+      preLoaderRoute: typeof AssistantImport
+      parentRoute: typeof rootRoute
+    }
+    '/pipeline': {
+      id: '/pipeline'
+      path: '/pipeline'
+      fullPath: '/pipeline'
+      preLoaderRoute: typeof PipelineImport
+      parentRoute: typeof rootRoute
+    }
+    '/accounts/$accountId': {
+      id: '/accounts/$accountId'
+      path: '/accounts/$accountId'
+      fullPath: '/accounts/$accountId'
+      preLoaderRoute: typeof AccountsAccountIdImport
+      parentRoute: typeof rootRoute
+    }
+    '/accounts/': {
+      id: '/accounts/'
+      path: '/accounts'
+      fullPath: '/accounts'
+      preLoaderRoute: typeof AccountsIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/contacts/': {
+      id: '/contacts/'
+      path: '/contacts'
+      fullPath: '/contacts'
+      preLoaderRoute: typeof ContactsIndexImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -39,32 +109,76 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/assistant': typeof AssistantRoute
+  '/pipeline': typeof PipelineRoute
+  '/accounts/$accountId': typeof AccountsAccountIdRoute
+  '/accounts': typeof AccountsIndexRoute
+  '/contacts': typeof ContactsIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/assistant': typeof AssistantRoute
+  '/pipeline': typeof PipelineRoute
+  '/accounts/$accountId': typeof AccountsAccountIdRoute
+  '/accounts': typeof AccountsIndexRoute
+  '/contacts': typeof ContactsIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/assistant': typeof AssistantRoute
+  '/pipeline': typeof PipelineRoute
+  '/accounts/$accountId': typeof AccountsAccountIdRoute
+  '/accounts/': typeof AccountsIndexRoute
+  '/contacts/': typeof ContactsIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/assistant'
+    | '/pipeline'
+    | '/accounts/$accountId'
+    | '/accounts'
+    | '/contacts'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/assistant'
+    | '/pipeline'
+    | '/accounts/$accountId'
+    | '/accounts'
+    | '/contacts'
+  id:
+    | '__root__'
+    | '/'
+    | '/assistant'
+    | '/pipeline'
+    | '/accounts/$accountId'
+    | '/accounts/'
+    | '/contacts/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AssistantRoute: typeof AssistantRoute
+  PipelineRoute: typeof PipelineRoute
+  AccountsAccountIdRoute: typeof AccountsAccountIdRoute
+  AccountsIndexRoute: typeof AccountsIndexRoute
+  ContactsIndexRoute: typeof ContactsIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AssistantRoute: AssistantRoute,
+  PipelineRoute: PipelineRoute,
+  AccountsAccountIdRoute: AccountsAccountIdRoute,
+  AccountsIndexRoute: AccountsIndexRoute,
+  ContactsIndexRoute: ContactsIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -77,11 +191,31 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/"
+        "/",
+        "/assistant",
+        "/pipeline",
+        "/accounts/$accountId",
+        "/accounts/",
+        "/contacts/"
       ]
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/assistant": {
+      "filePath": "assistant.tsx"
+    },
+    "/pipeline": {
+      "filePath": "pipeline.tsx"
+    },
+    "/accounts/$accountId": {
+      "filePath": "accounts/$accountId.tsx"
+    },
+    "/accounts/": {
+      "filePath": "accounts/index.tsx"
+    },
+    "/contacts/": {
+      "filePath": "contacts/index.tsx"
     }
   }
 }
