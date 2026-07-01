@@ -13,7 +13,11 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as accounts from "../accounts.js";
+import type * as contacts from "../contacts.js";
 import type * as conversations from "../conversations.js";
+import type * as deals from "../deals.js";
+import type * as seed from "../seed.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -24,7 +28,11 @@ import type * as conversations from "../conversations.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  accounts: typeof accounts;
+  contacts: typeof contacts;
   conversations: typeof conversations;
+  deals: typeof deals;
+  seed: typeof seed;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,
