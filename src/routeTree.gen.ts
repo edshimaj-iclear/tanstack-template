@@ -17,8 +17,11 @@ import { Route as AppTechnicalDocumentationImport } from './routes/_app/technica
 import { Route as AppRiskImport } from './routes/_app/risk'
 import { Route as AppProductsImport } from './routes/_app/products'
 import { Route as AppProductionImport } from './routes/_app/production'
+import { Route as AppPmsImport } from './routes/_app/pms'
+import { Route as AppDocumentsImport } from './routes/_app/documents'
 import { Route as AppDashboardImport } from './routes/_app/dashboard'
 import { Route as AppCapaImport } from './routes/_app/capa'
+import { Route as AppCalendarImport } from './routes/_app/calendar'
 import { Route as AppProductionIdImport } from './routes/_app/production.$id'
 
 // Create/Update Routes
@@ -58,6 +61,18 @@ const AppProductionRoute = AppProductionImport.update({
   getParentRoute: () => AppRoute,
 } as any)
 
+const AppPmsRoute = AppPmsImport.update({
+  id: '/pms',
+  path: '/pms',
+  getParentRoute: () => AppRoute,
+} as any)
+
+const AppDocumentsRoute = AppDocumentsImport.update({
+  id: '/documents',
+  path: '/documents',
+  getParentRoute: () => AppRoute,
+} as any)
+
 const AppDashboardRoute = AppDashboardImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -67,6 +82,12 @@ const AppDashboardRoute = AppDashboardImport.update({
 const AppCapaRoute = AppCapaImport.update({
   id: '/capa',
   path: '/capa',
+  getParentRoute: () => AppRoute,
+} as any)
+
+const AppCalendarRoute = AppCalendarImport.update({
+  id: '/calendar',
+  path: '/calendar',
   getParentRoute: () => AppRoute,
 } as any)
 
@@ -94,6 +115,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppImport
       parentRoute: typeof rootRoute
     }
+    '/_app/calendar': {
+      id: '/_app/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof AppCalendarImport
+      parentRoute: typeof AppImport
+    }
     '/_app/capa': {
       id: '/_app/capa'
       path: '/capa'
@@ -106,6 +134,20 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AppDashboardImport
+      parentRoute: typeof AppImport
+    }
+    '/_app/documents': {
+      id: '/_app/documents'
+      path: '/documents'
+      fullPath: '/documents'
+      preLoaderRoute: typeof AppDocumentsImport
+      parentRoute: typeof AppImport
+    }
+    '/_app/pms': {
+      id: '/_app/pms'
+      path: '/pms'
+      fullPath: '/pms'
+      preLoaderRoute: typeof AppPmsImport
       parentRoute: typeof AppImport
     }
     '/_app/production': {
@@ -161,8 +203,11 @@ const AppProductionRouteWithChildren = AppProductionRoute._addFileChildren(
 )
 
 interface AppRouteChildren {
+  AppCalendarRoute: typeof AppCalendarRoute
   AppCapaRoute: typeof AppCapaRoute
   AppDashboardRoute: typeof AppDashboardRoute
+  AppDocumentsRoute: typeof AppDocumentsRoute
+  AppPmsRoute: typeof AppPmsRoute
   AppProductionRoute: typeof AppProductionRouteWithChildren
   AppProductsRoute: typeof AppProductsRoute
   AppRiskRoute: typeof AppRiskRoute
@@ -170,8 +215,11 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppCalendarRoute: AppCalendarRoute,
   AppCapaRoute: AppCapaRoute,
   AppDashboardRoute: AppDashboardRoute,
+  AppDocumentsRoute: AppDocumentsRoute,
+  AppPmsRoute: AppPmsRoute,
   AppProductionRoute: AppProductionRouteWithChildren,
   AppProductsRoute: AppProductsRoute,
   AppRiskRoute: AppRiskRoute,
@@ -183,8 +231,11 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '': typeof AppRouteWithChildren
+  '/calendar': typeof AppCalendarRoute
   '/capa': typeof AppCapaRoute
   '/dashboard': typeof AppDashboardRoute
+  '/documents': typeof AppDocumentsRoute
+  '/pms': typeof AppPmsRoute
   '/production': typeof AppProductionRouteWithChildren
   '/products': typeof AppProductsRoute
   '/risk': typeof AppRiskRoute
@@ -195,8 +246,11 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '': typeof AppRouteWithChildren
+  '/calendar': typeof AppCalendarRoute
   '/capa': typeof AppCapaRoute
   '/dashboard': typeof AppDashboardRoute
+  '/documents': typeof AppDocumentsRoute
+  '/pms': typeof AppPmsRoute
   '/production': typeof AppProductionRouteWithChildren
   '/products': typeof AppProductsRoute
   '/risk': typeof AppRiskRoute
@@ -208,8 +262,11 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
+  '/_app/calendar': typeof AppCalendarRoute
   '/_app/capa': typeof AppCapaRoute
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/documents': typeof AppDocumentsRoute
+  '/_app/pms': typeof AppPmsRoute
   '/_app/production': typeof AppProductionRouteWithChildren
   '/_app/products': typeof AppProductsRoute
   '/_app/risk': typeof AppRiskRoute
@@ -222,8 +279,11 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | ''
+    | '/calendar'
     | '/capa'
     | '/dashboard'
+    | '/documents'
+    | '/pms'
     | '/production'
     | '/products'
     | '/risk'
@@ -233,8 +293,11 @@ export interface FileRouteTypes {
   to:
     | '/'
     | ''
+    | '/calendar'
     | '/capa'
     | '/dashboard'
+    | '/documents'
+    | '/pms'
     | '/production'
     | '/products'
     | '/risk'
@@ -244,8 +307,11 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_app'
+    | '/_app/calendar'
     | '/_app/capa'
     | '/_app/dashboard'
+    | '/_app/documents'
+    | '/_app/pms'
     | '/_app/production'
     | '/_app/products'
     | '/_app/risk'
@@ -284,13 +350,20 @@ export const routeTree = rootRoute
     "/_app": {
       "filePath": "_app.tsx",
       "children": [
+        "/_app/calendar",
         "/_app/capa",
         "/_app/dashboard",
+        "/_app/documents",
+        "/_app/pms",
         "/_app/production",
         "/_app/products",
         "/_app/risk",
         "/_app/technical-documentation"
       ]
+    },
+    "/_app/calendar": {
+      "filePath": "_app/calendar.tsx",
+      "parent": "/_app"
     },
     "/_app/capa": {
       "filePath": "_app/capa.tsx",
@@ -298,6 +371,14 @@ export const routeTree = rootRoute
     },
     "/_app/dashboard": {
       "filePath": "_app/dashboard.tsx",
+      "parent": "/_app"
+    },
+    "/_app/documents": {
+      "filePath": "_app/documents.tsx",
+      "parent": "/_app"
+    },
+    "/_app/pms": {
+      "filePath": "_app/pms.tsx",
       "parent": "/_app"
     },
     "/_app/production": {

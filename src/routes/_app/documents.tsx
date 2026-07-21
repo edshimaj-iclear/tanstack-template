@@ -199,6 +199,20 @@ function buildAuditTrail(doc: QmsDocument): TimelineItem[] {
   return items;
 }
 
+function docStatusTone(status: QmsDocument["status"]): TimelineItem["tone"] {
+  switch (status) {
+    case "Effective":
+    case "Approved":
+      return "success";
+    case "In Review":
+      return "info";
+    case "Draft":
+      return "neutral";
+    default:
+      return "warning";
+  }
+}
+
 const REVIEWERS = ["Anila Berisha", "Genti Hoxha", "Besnik Lami"];
 
 function DocumentsPage() {

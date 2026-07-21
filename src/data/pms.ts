@@ -330,7 +330,7 @@ export const PMS_SOURCE_NODES: PmsSourceNode[] = [
   { label: "Vigilance", icon: FileText, count: "0 reportable", tone: "success" },
 ];
 
-/* Filter option sets (mock, non-functional). */
+/* Filter option sets (mock, non-functional).                          */
 export const PMS_FILTERS = {
   product: ["All products", "iClear Aligners", "iClear Hero Kids", "iClear Night Guard", "iClear Retainer", "iClear Pro Clear"],
   country: ["All countries", "Albania", "Kosovo", "Italy", "Germany", "North Macedonia", "Greece"],
@@ -341,6 +341,3 @@ export const PMS_FILTERS = {
   thickness: ["All thicknesses", "0.4 mm", "0.5 mm", "0.6 mm", "0.75 mm"],
   line: ["All lines", "Line A — Tirana", "Line B — Tirana", "Line C — Prishtina"],
 };
-
-/* Icon aliases re-exported for the page. */
-export { FlaskConical, Activity, BookOpen, ClipboardList };

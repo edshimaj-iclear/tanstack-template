@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ComponentType, type ReactNode } from "react";
 import {
   CalendarDays,
   CalendarRange,
@@ -222,9 +222,9 @@ function FilterRow({
   label,
   children,
 }: {
-  icon: React.ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string }>;
   label: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
@@ -594,7 +594,7 @@ function EventDialog({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div>
       <dt className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-fg-muted">
