@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useMatchRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
@@ -53,6 +53,8 @@ function qcTone(qc: ProductionCase["qcResult"]) {
 
 function ProductionPage() {
   const navigate = useNavigate();
+  const matchRoute = useMatchRoute();
+  const isDetail = !!matchRoute({ to: "/production/$id", fuzzy: false });
   const [search, setSearch] = useState("");
   const [stageFilter, setStageFilter] = useState<string>("all");
   const [qcFilter, setQcFilter] = useState<string>("all");
@@ -202,6 +204,8 @@ function ProductionPage() {
       cell: () => <ChevronRight className="size-4 text-fg-muted" />,
     },
   ];
+
+  if (isDetail) return <Outlet />;
 
   return (
     <div className="space-y-6">

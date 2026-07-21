@@ -29,7 +29,7 @@ import { Input } from "../../components/ui/input";
 import { Avatar, Switch, Separator } from "../../components/ui/misc";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { TEAM, DEPARTMENTS } from "../../data/team";
-import { formatDate, cn } from "../../lib/utils";
+import { formatDate } from "../../lib/utils";
 
 export const Route = createFileRoute("/_app/administration")({
   component: AdministrationPage,
