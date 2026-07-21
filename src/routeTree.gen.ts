@@ -11,14 +11,69 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as AppImport } from './routes/_app'
 import { Route as IndexImport } from './routes/index'
+import { Route as AppTechnicalDocumentationImport } from './routes/_app/technical-documentation'
+import { Route as AppRiskImport } from './routes/_app/risk'
+import { Route as AppProductsImport } from './routes/_app/products'
+import { Route as AppProductionImport } from './routes/_app/production'
+import { Route as AppDashboardImport } from './routes/_app/dashboard'
+import { Route as AppCapaImport } from './routes/_app/capa'
+import { Route as AppProductionIdImport } from './routes/_app/production.$id'
 
 // Create/Update Routes
+
+const AppRoute = AppImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRoute,
+} as any)
+
+const AppTechnicalDocumentationRoute = AppTechnicalDocumentationImport.update({
+  id: '/technical-documentation',
+  path: '/technical-documentation',
+  getParentRoute: () => AppRoute,
+} as any)
+
+const AppRiskRoute = AppRiskImport.update({
+  id: '/risk',
+  path: '/risk',
+  getParentRoute: () => AppRoute,
+} as any)
+
+const AppProductsRoute = AppProductsImport.update({
+  id: '/products',
+  path: '/products',
+  getParentRoute: () => AppRoute,
+} as any)
+
+const AppProductionRoute = AppProductionImport.update({
+  id: '/production',
+  path: '/production',
+  getParentRoute: () => AppRoute,
+} as any)
+
+const AppDashboardRoute = AppDashboardImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+
+const AppCapaRoute = AppCapaImport.update({
+  id: '/capa',
+  path: '/capa',
+  getParentRoute: () => AppRoute,
+} as any)
+
+const AppProductionIdRoute = AppProductionIdImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AppProductionRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -32,39 +87,181 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AppImport
+      parentRoute: typeof rootRoute
+    }
+    '/_app/capa': {
+      id: '/_app/capa'
+      path: '/capa'
+      fullPath: '/capa'
+      preLoaderRoute: typeof AppCapaImport
+      parentRoute: typeof AppImport
+    }
+    '/_app/dashboard': {
+      id: '/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AppDashboardImport
+      parentRoute: typeof AppImport
+    }
+    '/_app/production': {
+      id: '/_app/production'
+      path: '/production'
+      fullPath: '/production'
+      preLoaderRoute: typeof AppProductionImport
+      parentRoute: typeof AppImport
+    }
+    '/_app/products': {
+      id: '/_app/products'
+      path: '/products'
+      fullPath: '/products'
+      preLoaderRoute: typeof AppProductsImport
+      parentRoute: typeof AppImport
+    }
+    '/_app/risk': {
+      id: '/_app/risk'
+      path: '/risk'
+      fullPath: '/risk'
+      preLoaderRoute: typeof AppRiskImport
+      parentRoute: typeof AppImport
+    }
+    '/_app/technical-documentation': {
+      id: '/_app/technical-documentation'
+      path: '/technical-documentation'
+      fullPath: '/technical-documentation'
+      preLoaderRoute: typeof AppTechnicalDocumentationImport
+      parentRoute: typeof AppImport
+    }
+    '/_app/production/$id': {
+      id: '/_app/production/$id'
+      path: '/$id'
+      fullPath: '/production/$id'
+      preLoaderRoute: typeof AppProductionIdImport
+      parentRoute: typeof AppProductionImport
+    }
   }
 }
 
 // Create and export the route tree
 
+interface AppProductionRouteChildren {
+  AppProductionIdRoute: typeof AppProductionIdRoute
+}
+
+const AppProductionRouteChildren: AppProductionRouteChildren = {
+  AppProductionIdRoute: AppProductionIdRoute,
+}
+
+const AppProductionRouteWithChildren = AppProductionRoute._addFileChildren(
+  AppProductionRouteChildren,
+)
+
+interface AppRouteChildren {
+  AppCapaRoute: typeof AppCapaRoute
+  AppDashboardRoute: typeof AppDashboardRoute
+  AppProductionRoute: typeof AppProductionRouteWithChildren
+  AppProductsRoute: typeof AppProductsRoute
+  AppRiskRoute: typeof AppRiskRoute
+  AppTechnicalDocumentationRoute: typeof AppTechnicalDocumentationRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppCapaRoute: AppCapaRoute,
+  AppDashboardRoute: AppDashboardRoute,
+  AppProductionRoute: AppProductionRouteWithChildren,
+  AppProductsRoute: AppProductsRoute,
+  AppRiskRoute: AppRiskRoute,
+  AppTechnicalDocumentationRoute: AppTechnicalDocumentationRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '': typeof AppRouteWithChildren
+  '/capa': typeof AppCapaRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/production': typeof AppProductionRouteWithChildren
+  '/products': typeof AppProductsRoute
+  '/risk': typeof AppRiskRoute
+  '/technical-documentation': typeof AppTechnicalDocumentationRoute
+  '/production/$id': typeof AppProductionIdRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '': typeof AppRouteWithChildren
+  '/capa': typeof AppCapaRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/production': typeof AppProductionRouteWithChildren
+  '/products': typeof AppProductsRoute
+  '/risk': typeof AppRiskRoute
+  '/technical-documentation': typeof AppTechnicalDocumentationRoute
+  '/production/$id': typeof AppProductionIdRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
+  '/_app/capa': typeof AppCapaRoute
+  '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/production': typeof AppProductionRouteWithChildren
+  '/_app/products': typeof AppProductsRoute
+  '/_app/risk': typeof AppRiskRoute
+  '/_app/technical-documentation': typeof AppTechnicalDocumentationRoute
+  '/_app/production/$id': typeof AppProductionIdRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | ''
+    | '/capa'
+    | '/dashboard'
+    | '/production'
+    | '/products'
+    | '/risk'
+    | '/technical-documentation'
+    | '/production/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | ''
+    | '/capa'
+    | '/dashboard'
+    | '/production'
+    | '/products'
+    | '/risk'
+    | '/technical-documentation'
+    | '/production/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/_app/capa'
+    | '/_app/dashboard'
+    | '/_app/production'
+    | '/_app/products'
+    | '/_app/risk'
+    | '/_app/technical-documentation'
+    | '/_app/production/$id'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
 }
 
 export const routeTree = rootRoute
@@ -77,11 +274,54 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/"
+        "/",
+        "/_app"
       ]
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/_app": {
+      "filePath": "_app.tsx",
+      "children": [
+        "/_app/capa",
+        "/_app/dashboard",
+        "/_app/production",
+        "/_app/products",
+        "/_app/risk",
+        "/_app/technical-documentation"
+      ]
+    },
+    "/_app/capa": {
+      "filePath": "_app/capa.tsx",
+      "parent": "/_app"
+    },
+    "/_app/dashboard": {
+      "filePath": "_app/dashboard.tsx",
+      "parent": "/_app"
+    },
+    "/_app/production": {
+      "filePath": "_app/production.tsx",
+      "parent": "/_app",
+      "children": [
+        "/_app/production/$id"
+      ]
+    },
+    "/_app/products": {
+      "filePath": "_app/products.tsx",
+      "parent": "/_app"
+    },
+    "/_app/risk": {
+      "filePath": "_app/risk.tsx",
+      "parent": "/_app"
+    },
+    "/_app/technical-documentation": {
+      "filePath": "_app/technical-documentation.tsx",
+      "parent": "/_app"
+    },
+    "/_app/production/$id": {
+      "filePath": "_app/production.$id.tsx",
+      "parent": "/_app/production"
     }
   }
 }
