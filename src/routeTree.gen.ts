@@ -13,15 +13,22 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as AppImport } from './routes/_app'
 import { Route as IndexImport } from './routes/index'
+import { Route as AppTrainingImport } from './routes/_app/training'
 import { Route as AppTechnicalDocumentationImport } from './routes/_app/technical-documentation'
 import { Route as AppRiskImport } from './routes/_app/risk'
+import { Route as AppReportsImport } from './routes/_app/reports'
 import { Route as AppProductsImport } from './routes/_app/products'
 import { Route as AppProductionImport } from './routes/_app/production'
 import { Route as AppPmsImport } from './routes/_app/pms'
+import { Route as AppManagementReviewImport } from './routes/_app/management-review'
+import { Route as AppEquipmentImport } from './routes/_app/equipment'
 import { Route as AppDocumentsImport } from './routes/_app/documents'
 import { Route as AppDashboardImport } from './routes/_app/dashboard'
+import { Route as AppComplaintsImport } from './routes/_app/complaints'
 import { Route as AppCapaImport } from './routes/_app/capa'
 import { Route as AppCalendarImport } from './routes/_app/calendar'
+import { Route as AppAuditsImport } from './routes/_app/audits'
+import { Route as AppProductsIdImport } from './routes/_app/products.$id'
 import { Route as AppProductionIdImport } from './routes/_app/production.$id'
 
 // Create/Update Routes
@@ -37,6 +44,12 @@ const IndexRoute = IndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const AppTrainingRoute = AppTrainingImport.update({
+  id: '/training',
+  path: '/training',
+  getParentRoute: () => AppRoute,
+} as any)
+
 const AppTechnicalDocumentationRoute = AppTechnicalDocumentationImport.update({
   id: '/technical-documentation',
   path: '/technical-documentation',
@@ -46,6 +59,12 @@ const AppTechnicalDocumentationRoute = AppTechnicalDocumentationImport.update({
 const AppRiskRoute = AppRiskImport.update({
   id: '/risk',
   path: '/risk',
+  getParentRoute: () => AppRoute,
+} as any)
+
+const AppReportsRoute = AppReportsImport.update({
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => AppRoute,
 } as any)
 
@@ -67,6 +86,18 @@ const AppPmsRoute = AppPmsImport.update({
   getParentRoute: () => AppRoute,
 } as any)
 
+const AppManagementReviewRoute = AppManagementReviewImport.update({
+  id: '/management-review',
+  path: '/management-review',
+  getParentRoute: () => AppRoute,
+} as any)
+
+const AppEquipmentRoute = AppEquipmentImport.update({
+  id: '/equipment',
+  path: '/equipment',
+  getParentRoute: () => AppRoute,
+} as any)
+
 const AppDocumentsRoute = AppDocumentsImport.update({
   id: '/documents',
   path: '/documents',
@@ -76,6 +107,12 @@ const AppDocumentsRoute = AppDocumentsImport.update({
 const AppDashboardRoute = AppDashboardImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+
+const AppComplaintsRoute = AppComplaintsImport.update({
+  id: '/complaints',
+  path: '/complaints',
   getParentRoute: () => AppRoute,
 } as any)
 
@@ -89,6 +126,18 @@ const AppCalendarRoute = AppCalendarImport.update({
   id: '/calendar',
   path: '/calendar',
   getParentRoute: () => AppRoute,
+} as any)
+
+const AppAuditsRoute = AppAuditsImport.update({
+  id: '/audits',
+  path: '/audits',
+  getParentRoute: () => AppRoute,
+} as any)
+
+const AppProductsIdRoute = AppProductsIdImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AppProductsRoute,
 } as any)
 
 const AppProductionIdRoute = AppProductionIdImport.update({
@@ -115,6 +164,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppImport
       parentRoute: typeof rootRoute
     }
+    '/_app/audits': {
+      id: '/_app/audits'
+      path: '/audits'
+      fullPath: '/audits'
+      preLoaderRoute: typeof AppAuditsImport
+      parentRoute: typeof AppImport
+    }
     '/_app/calendar': {
       id: '/_app/calendar'
       path: '/calendar'
@@ -129,6 +185,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCapaImport
       parentRoute: typeof AppImport
     }
+    '/_app/complaints': {
+      id: '/_app/complaints'
+      path: '/complaints'
+      fullPath: '/complaints'
+      preLoaderRoute: typeof AppComplaintsImport
+      parentRoute: typeof AppImport
+    }
     '/_app/dashboard': {
       id: '/_app/dashboard'
       path: '/dashboard'
@@ -141,6 +204,20 @@ declare module '@tanstack/react-router' {
       path: '/documents'
       fullPath: '/documents'
       preLoaderRoute: typeof AppDocumentsImport
+      parentRoute: typeof AppImport
+    }
+    '/_app/equipment': {
+      id: '/_app/equipment'
+      path: '/equipment'
+      fullPath: '/equipment'
+      preLoaderRoute: typeof AppEquipmentImport
+      parentRoute: typeof AppImport
+    }
+    '/_app/management-review': {
+      id: '/_app/management-review'
+      path: '/management-review'
+      fullPath: '/management-review'
+      preLoaderRoute: typeof AppManagementReviewImport
       parentRoute: typeof AppImport
     }
     '/_app/pms': {
@@ -164,6 +241,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProductsImport
       parentRoute: typeof AppImport
     }
+    '/_app/reports': {
+      id: '/_app/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AppReportsImport
+      parentRoute: typeof AppImport
+    }
     '/_app/risk': {
       id: '/_app/risk'
       path: '/risk'
@@ -178,12 +262,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTechnicalDocumentationImport
       parentRoute: typeof AppImport
     }
+    '/_app/training': {
+      id: '/_app/training'
+      path: '/training'
+      fullPath: '/training'
+      preLoaderRoute: typeof AppTrainingImport
+      parentRoute: typeof AppImport
+    }
     '/_app/production/$id': {
       id: '/_app/production/$id'
       path: '/$id'
       fullPath: '/production/$id'
       preLoaderRoute: typeof AppProductionIdImport
       parentRoute: typeof AppProductionImport
+    }
+    '/_app/products/$id': {
+      id: '/_app/products/$id'
+      path: '/$id'
+      fullPath: '/products/$id'
+      preLoaderRoute: typeof AppProductsIdImport
+      parentRoute: typeof AppProductsImport
     }
   }
 }
@@ -202,28 +300,52 @@ const AppProductionRouteWithChildren = AppProductionRoute._addFileChildren(
   AppProductionRouteChildren,
 )
 
+interface AppProductsRouteChildren {
+  AppProductsIdRoute: typeof AppProductsIdRoute
+}
+
+const AppProductsRouteChildren: AppProductsRouteChildren = {
+  AppProductsIdRoute: AppProductsIdRoute,
+}
+
+const AppProductsRouteWithChildren = AppProductsRoute._addFileChildren(
+  AppProductsRouteChildren,
+)
+
 interface AppRouteChildren {
+  AppAuditsRoute: typeof AppAuditsRoute
   AppCalendarRoute: typeof AppCalendarRoute
   AppCapaRoute: typeof AppCapaRoute
+  AppComplaintsRoute: typeof AppComplaintsRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppDocumentsRoute: typeof AppDocumentsRoute
+  AppEquipmentRoute: typeof AppEquipmentRoute
+  AppManagementReviewRoute: typeof AppManagementReviewRoute
   AppPmsRoute: typeof AppPmsRoute
   AppProductionRoute: typeof AppProductionRouteWithChildren
-  AppProductsRoute: typeof AppProductsRoute
+  AppProductsRoute: typeof AppProductsRouteWithChildren
+  AppReportsRoute: typeof AppReportsRoute
   AppRiskRoute: typeof AppRiskRoute
   AppTechnicalDocumentationRoute: typeof AppTechnicalDocumentationRoute
+  AppTrainingRoute: typeof AppTrainingRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAuditsRoute: AppAuditsRoute,
   AppCalendarRoute: AppCalendarRoute,
   AppCapaRoute: AppCapaRoute,
+  AppComplaintsRoute: AppComplaintsRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppDocumentsRoute: AppDocumentsRoute,
+  AppEquipmentRoute: AppEquipmentRoute,
+  AppManagementReviewRoute: AppManagementReviewRoute,
   AppPmsRoute: AppPmsRoute,
   AppProductionRoute: AppProductionRouteWithChildren,
-  AppProductsRoute: AppProductsRoute,
+  AppProductsRoute: AppProductsRouteWithChildren,
+  AppReportsRoute: AppReportsRoute,
   AppRiskRoute: AppRiskRoute,
   AppTechnicalDocumentationRoute: AppTechnicalDocumentationRoute,
+  AppTrainingRoute: AppTrainingRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
@@ -231,47 +353,68 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '': typeof AppRouteWithChildren
+  '/audits': typeof AppAuditsRoute
   '/calendar': typeof AppCalendarRoute
   '/capa': typeof AppCapaRoute
+  '/complaints': typeof AppComplaintsRoute
   '/dashboard': typeof AppDashboardRoute
   '/documents': typeof AppDocumentsRoute
+  '/equipment': typeof AppEquipmentRoute
+  '/management-review': typeof AppManagementReviewRoute
   '/pms': typeof AppPmsRoute
   '/production': typeof AppProductionRouteWithChildren
-  '/products': typeof AppProductsRoute
+  '/products': typeof AppProductsRouteWithChildren
+  '/reports': typeof AppReportsRoute
   '/risk': typeof AppRiskRoute
   '/technical-documentation': typeof AppTechnicalDocumentationRoute
+  '/training': typeof AppTrainingRoute
   '/production/$id': typeof AppProductionIdRoute
+  '/products/$id': typeof AppProductsIdRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '': typeof AppRouteWithChildren
+  '/audits': typeof AppAuditsRoute
   '/calendar': typeof AppCalendarRoute
   '/capa': typeof AppCapaRoute
+  '/complaints': typeof AppComplaintsRoute
   '/dashboard': typeof AppDashboardRoute
   '/documents': typeof AppDocumentsRoute
+  '/equipment': typeof AppEquipmentRoute
+  '/management-review': typeof AppManagementReviewRoute
   '/pms': typeof AppPmsRoute
   '/production': typeof AppProductionRouteWithChildren
-  '/products': typeof AppProductsRoute
+  '/products': typeof AppProductsRouteWithChildren
+  '/reports': typeof AppReportsRoute
   '/risk': typeof AppRiskRoute
   '/technical-documentation': typeof AppTechnicalDocumentationRoute
+  '/training': typeof AppTrainingRoute
   '/production/$id': typeof AppProductionIdRoute
+  '/products/$id': typeof AppProductsIdRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
+  '/_app/audits': typeof AppAuditsRoute
   '/_app/calendar': typeof AppCalendarRoute
   '/_app/capa': typeof AppCapaRoute
+  '/_app/complaints': typeof AppComplaintsRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/documents': typeof AppDocumentsRoute
+  '/_app/equipment': typeof AppEquipmentRoute
+  '/_app/management-review': typeof AppManagementReviewRoute
   '/_app/pms': typeof AppPmsRoute
   '/_app/production': typeof AppProductionRouteWithChildren
-  '/_app/products': typeof AppProductsRoute
+  '/_app/products': typeof AppProductsRouteWithChildren
+  '/_app/reports': typeof AppReportsRoute
   '/_app/risk': typeof AppRiskRoute
   '/_app/technical-documentation': typeof AppTechnicalDocumentationRoute
+  '/_app/training': typeof AppTrainingRoute
   '/_app/production/$id': typeof AppProductionIdRoute
+  '/_app/products/$id': typeof AppProductsIdRoute
 }
 
 export interface FileRouteTypes {
@@ -279,44 +422,65 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | ''
+    | '/audits'
     | '/calendar'
     | '/capa'
+    | '/complaints'
     | '/dashboard'
     | '/documents'
+    | '/equipment'
+    | '/management-review'
     | '/pms'
     | '/production'
     | '/products'
+    | '/reports'
     | '/risk'
     | '/technical-documentation'
+    | '/training'
     | '/production/$id'
+    | '/products/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | ''
+    | '/audits'
     | '/calendar'
     | '/capa'
+    | '/complaints'
     | '/dashboard'
     | '/documents'
+    | '/equipment'
+    | '/management-review'
     | '/pms'
     | '/production'
     | '/products'
+    | '/reports'
     | '/risk'
     | '/technical-documentation'
+    | '/training'
     | '/production/$id'
+    | '/products/$id'
   id:
     | '__root__'
     | '/'
     | '/_app'
+    | '/_app/audits'
     | '/_app/calendar'
     | '/_app/capa'
+    | '/_app/complaints'
     | '/_app/dashboard'
     | '/_app/documents'
+    | '/_app/equipment'
+    | '/_app/management-review'
     | '/_app/pms'
     | '/_app/production'
     | '/_app/products'
+    | '/_app/reports'
     | '/_app/risk'
     | '/_app/technical-documentation'
+    | '/_app/training'
     | '/_app/production/$id'
+    | '/_app/products/$id'
   fileRoutesById: FileRoutesById
 }
 
@@ -350,16 +514,26 @@ export const routeTree = rootRoute
     "/_app": {
       "filePath": "_app.tsx",
       "children": [
+        "/_app/audits",
         "/_app/calendar",
         "/_app/capa",
+        "/_app/complaints",
         "/_app/dashboard",
         "/_app/documents",
+        "/_app/equipment",
+        "/_app/management-review",
         "/_app/pms",
         "/_app/production",
         "/_app/products",
+        "/_app/reports",
         "/_app/risk",
-        "/_app/technical-documentation"
+        "/_app/technical-documentation",
+        "/_app/training"
       ]
+    },
+    "/_app/audits": {
+      "filePath": "_app/audits.tsx",
+      "parent": "/_app"
     },
     "/_app/calendar": {
       "filePath": "_app/calendar.tsx",
@@ -369,12 +543,24 @@ export const routeTree = rootRoute
       "filePath": "_app/capa.tsx",
       "parent": "/_app"
     },
+    "/_app/complaints": {
+      "filePath": "_app/complaints.tsx",
+      "parent": "/_app"
+    },
     "/_app/dashboard": {
       "filePath": "_app/dashboard.tsx",
       "parent": "/_app"
     },
     "/_app/documents": {
       "filePath": "_app/documents.tsx",
+      "parent": "/_app"
+    },
+    "/_app/equipment": {
+      "filePath": "_app/equipment.tsx",
+      "parent": "/_app"
+    },
+    "/_app/management-review": {
+      "filePath": "_app/management-review.tsx",
       "parent": "/_app"
     },
     "/_app/pms": {
@@ -390,6 +576,13 @@ export const routeTree = rootRoute
     },
     "/_app/products": {
       "filePath": "_app/products.tsx",
+      "parent": "/_app",
+      "children": [
+        "/_app/products/$id"
+      ]
+    },
+    "/_app/reports": {
+      "filePath": "_app/reports.tsx",
       "parent": "/_app"
     },
     "/_app/risk": {
@@ -400,9 +593,17 @@ export const routeTree = rootRoute
       "filePath": "_app/technical-documentation.tsx",
       "parent": "/_app"
     },
+    "/_app/training": {
+      "filePath": "_app/training.tsx",
+      "parent": "/_app"
+    },
     "/_app/production/$id": {
       "filePath": "_app/production.$id.tsx",
       "parent": "/_app/production"
+    },
+    "/_app/products/$id": {
+      "filePath": "_app/products.$id.tsx",
+      "parent": "/_app/products"
     }
   }
 }
