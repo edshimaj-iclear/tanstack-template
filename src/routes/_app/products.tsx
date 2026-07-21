@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useMatchRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useMatchRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import {
   Package,
@@ -57,7 +57,8 @@ function ProductsPage() {
     return PRODUCTS.filter((p) => p.status === filter);
   }, [filter]);
 
-  if (isDetail) return null;
+  // On /products/$id the detail route paints into this layout's outlet.
+  if (isDetail) return <Outlet />;
 
   const options = [
     { label: "All", value: "all", count: counts.all },

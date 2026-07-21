@@ -14,7 +14,7 @@ import {
 import { PageHeader } from "../../components/qms/PageHeader";
 import { MetricCard } from "../../components/qms/MetricCard";
 import { FilterChips } from "../../components/qms/FilterBar";
-import { Card, CardContent } from "../../components/ui/card";
+import { Card } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
 import { Avatar } from "../../components/ui/misc";

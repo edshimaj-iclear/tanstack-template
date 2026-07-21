@@ -15,11 +15,13 @@ import { Route as AppImport } from './routes/_app'
 import { Route as IndexImport } from './routes/index'
 import { Route as AppTrainingImport } from './routes/_app/training'
 import { Route as AppTechnicalDocumentationImport } from './routes/_app/technical-documentation'
+import { Route as AppSuppliersImport } from './routes/_app/suppliers'
 import { Route as AppRiskImport } from './routes/_app/risk'
 import { Route as AppReportsImport } from './routes/_app/reports'
 import { Route as AppProductsImport } from './routes/_app/products'
 import { Route as AppProductionImport } from './routes/_app/production'
 import { Route as AppPmsImport } from './routes/_app/pms'
+import { Route as AppNonconformitiesImport } from './routes/_app/nonconformities'
 import { Route as AppManagementReviewImport } from './routes/_app/management-review'
 import { Route as AppEquipmentImport } from './routes/_app/equipment'
 import { Route as AppDocumentsImport } from './routes/_app/documents'
@@ -28,6 +30,7 @@ import { Route as AppComplaintsImport } from './routes/_app/complaints'
 import { Route as AppCapaImport } from './routes/_app/capa'
 import { Route as AppCalendarImport } from './routes/_app/calendar'
 import { Route as AppAuditsImport } from './routes/_app/audits'
+import { Route as AppAdministrationImport } from './routes/_app/administration'
 import { Route as AppProductsIdImport } from './routes/_app/products.$id'
 import { Route as AppProductionIdImport } from './routes/_app/production.$id'
 
@@ -53,6 +56,12 @@ const AppTrainingRoute = AppTrainingImport.update({
 const AppTechnicalDocumentationRoute = AppTechnicalDocumentationImport.update({
   id: '/technical-documentation',
   path: '/technical-documentation',
+  getParentRoute: () => AppRoute,
+} as any)
+
+const AppSuppliersRoute = AppSuppliersImport.update({
+  id: '/suppliers',
+  path: '/suppliers',
   getParentRoute: () => AppRoute,
 } as any)
 
@@ -83,6 +92,12 @@ const AppProductionRoute = AppProductionImport.update({
 const AppPmsRoute = AppPmsImport.update({
   id: '/pms',
   path: '/pms',
+  getParentRoute: () => AppRoute,
+} as any)
+
+const AppNonconformitiesRoute = AppNonconformitiesImport.update({
+  id: '/nonconformities',
+  path: '/nonconformities',
   getParentRoute: () => AppRoute,
 } as any)
 
@@ -134,6 +149,12 @@ const AppAuditsRoute = AppAuditsImport.update({
   getParentRoute: () => AppRoute,
 } as any)
 
+const AppAdministrationRoute = AppAdministrationImport.update({
+  id: '/administration',
+  path: '/administration',
+  getParentRoute: () => AppRoute,
+} as any)
+
 const AppProductsIdRoute = AppProductsIdImport.update({
   id: '/$id',
   path: '/$id',
@@ -163,6 +184,13 @@ declare module '@tanstack/react-router' {
       fullPath: ''
       preLoaderRoute: typeof AppImport
       parentRoute: typeof rootRoute
+    }
+    '/_app/administration': {
+      id: '/_app/administration'
+      path: '/administration'
+      fullPath: '/administration'
+      preLoaderRoute: typeof AppAdministrationImport
+      parentRoute: typeof AppImport
     }
     '/_app/audits': {
       id: '/_app/audits'
@@ -220,6 +248,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppManagementReviewImport
       parentRoute: typeof AppImport
     }
+    '/_app/nonconformities': {
+      id: '/_app/nonconformities'
+      path: '/nonconformities'
+      fullPath: '/nonconformities'
+      preLoaderRoute: typeof AppNonconformitiesImport
+      parentRoute: typeof AppImport
+    }
     '/_app/pms': {
       id: '/_app/pms'
       path: '/pms'
@@ -253,6 +288,13 @@ declare module '@tanstack/react-router' {
       path: '/risk'
       fullPath: '/risk'
       preLoaderRoute: typeof AppRiskImport
+      parentRoute: typeof AppImport
+    }
+    '/_app/suppliers': {
+      id: '/_app/suppliers'
+      path: '/suppliers'
+      fullPath: '/suppliers'
+      preLoaderRoute: typeof AppSuppliersImport
       parentRoute: typeof AppImport
     }
     '/_app/technical-documentation': {
@@ -313,6 +355,7 @@ const AppProductsRouteWithChildren = AppProductsRoute._addFileChildren(
 )
 
 interface AppRouteChildren {
+  AppAdministrationRoute: typeof AppAdministrationRoute
   AppAuditsRoute: typeof AppAuditsRoute
   AppCalendarRoute: typeof AppCalendarRoute
   AppCapaRoute: typeof AppCapaRoute
@@ -321,16 +364,19 @@ interface AppRouteChildren {
   AppDocumentsRoute: typeof AppDocumentsRoute
   AppEquipmentRoute: typeof AppEquipmentRoute
   AppManagementReviewRoute: typeof AppManagementReviewRoute
+  AppNonconformitiesRoute: typeof AppNonconformitiesRoute
   AppPmsRoute: typeof AppPmsRoute
   AppProductionRoute: typeof AppProductionRouteWithChildren
   AppProductsRoute: typeof AppProductsRouteWithChildren
   AppReportsRoute: typeof AppReportsRoute
   AppRiskRoute: typeof AppRiskRoute
+  AppSuppliersRoute: typeof AppSuppliersRoute
   AppTechnicalDocumentationRoute: typeof AppTechnicalDocumentationRoute
   AppTrainingRoute: typeof AppTrainingRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAdministrationRoute: AppAdministrationRoute,
   AppAuditsRoute: AppAuditsRoute,
   AppCalendarRoute: AppCalendarRoute,
   AppCapaRoute: AppCapaRoute,
@@ -339,11 +385,13 @@ const AppRouteChildren: AppRouteChildren = {
   AppDocumentsRoute: AppDocumentsRoute,
   AppEquipmentRoute: AppEquipmentRoute,
   AppManagementReviewRoute: AppManagementReviewRoute,
+  AppNonconformitiesRoute: AppNonconformitiesRoute,
   AppPmsRoute: AppPmsRoute,
   AppProductionRoute: AppProductionRouteWithChildren,
   AppProductsRoute: AppProductsRouteWithChildren,
   AppReportsRoute: AppReportsRoute,
   AppRiskRoute: AppRiskRoute,
+  AppSuppliersRoute: AppSuppliersRoute,
   AppTechnicalDocumentationRoute: AppTechnicalDocumentationRoute,
   AppTrainingRoute: AppTrainingRoute,
 }
@@ -353,6 +401,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '': typeof AppRouteWithChildren
+  '/administration': typeof AppAdministrationRoute
   '/audits': typeof AppAuditsRoute
   '/calendar': typeof AppCalendarRoute
   '/capa': typeof AppCapaRoute
@@ -361,11 +410,13 @@ export interface FileRoutesByFullPath {
   '/documents': typeof AppDocumentsRoute
   '/equipment': typeof AppEquipmentRoute
   '/management-review': typeof AppManagementReviewRoute
+  '/nonconformities': typeof AppNonconformitiesRoute
   '/pms': typeof AppPmsRoute
   '/production': typeof AppProductionRouteWithChildren
   '/products': typeof AppProductsRouteWithChildren
   '/reports': typeof AppReportsRoute
   '/risk': typeof AppRiskRoute
+  '/suppliers': typeof AppSuppliersRoute
   '/technical-documentation': typeof AppTechnicalDocumentationRoute
   '/training': typeof AppTrainingRoute
   '/production/$id': typeof AppProductionIdRoute
@@ -375,6 +426,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '': typeof AppRouteWithChildren
+  '/administration': typeof AppAdministrationRoute
   '/audits': typeof AppAuditsRoute
   '/calendar': typeof AppCalendarRoute
   '/capa': typeof AppCapaRoute
@@ -383,11 +435,13 @@ export interface FileRoutesByTo {
   '/documents': typeof AppDocumentsRoute
   '/equipment': typeof AppEquipmentRoute
   '/management-review': typeof AppManagementReviewRoute
+  '/nonconformities': typeof AppNonconformitiesRoute
   '/pms': typeof AppPmsRoute
   '/production': typeof AppProductionRouteWithChildren
   '/products': typeof AppProductsRouteWithChildren
   '/reports': typeof AppReportsRoute
   '/risk': typeof AppRiskRoute
+  '/suppliers': typeof AppSuppliersRoute
   '/technical-documentation': typeof AppTechnicalDocumentationRoute
   '/training': typeof AppTrainingRoute
   '/production/$id': typeof AppProductionIdRoute
@@ -398,6 +452,7 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
+  '/_app/administration': typeof AppAdministrationRoute
   '/_app/audits': typeof AppAuditsRoute
   '/_app/calendar': typeof AppCalendarRoute
   '/_app/capa': typeof AppCapaRoute
@@ -406,11 +461,13 @@ export interface FileRoutesById {
   '/_app/documents': typeof AppDocumentsRoute
   '/_app/equipment': typeof AppEquipmentRoute
   '/_app/management-review': typeof AppManagementReviewRoute
+  '/_app/nonconformities': typeof AppNonconformitiesRoute
   '/_app/pms': typeof AppPmsRoute
   '/_app/production': typeof AppProductionRouteWithChildren
   '/_app/products': typeof AppProductsRouteWithChildren
   '/_app/reports': typeof AppReportsRoute
   '/_app/risk': typeof AppRiskRoute
+  '/_app/suppliers': typeof AppSuppliersRoute
   '/_app/technical-documentation': typeof AppTechnicalDocumentationRoute
   '/_app/training': typeof AppTrainingRoute
   '/_app/production/$id': typeof AppProductionIdRoute
@@ -422,6 +479,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | ''
+    | '/administration'
     | '/audits'
     | '/calendar'
     | '/capa'
@@ -430,11 +488,13 @@ export interface FileRouteTypes {
     | '/documents'
     | '/equipment'
     | '/management-review'
+    | '/nonconformities'
     | '/pms'
     | '/production'
     | '/products'
     | '/reports'
     | '/risk'
+    | '/suppliers'
     | '/technical-documentation'
     | '/training'
     | '/production/$id'
@@ -443,6 +503,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | ''
+    | '/administration'
     | '/audits'
     | '/calendar'
     | '/capa'
@@ -451,11 +512,13 @@ export interface FileRouteTypes {
     | '/documents'
     | '/equipment'
     | '/management-review'
+    | '/nonconformities'
     | '/pms'
     | '/production'
     | '/products'
     | '/reports'
     | '/risk'
+    | '/suppliers'
     | '/technical-documentation'
     | '/training'
     | '/production/$id'
@@ -464,6 +527,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_app'
+    | '/_app/administration'
     | '/_app/audits'
     | '/_app/calendar'
     | '/_app/capa'
@@ -472,11 +536,13 @@ export interface FileRouteTypes {
     | '/_app/documents'
     | '/_app/equipment'
     | '/_app/management-review'
+    | '/_app/nonconformities'
     | '/_app/pms'
     | '/_app/production'
     | '/_app/products'
     | '/_app/reports'
     | '/_app/risk'
+    | '/_app/suppliers'
     | '/_app/technical-documentation'
     | '/_app/training'
     | '/_app/production/$id'
@@ -514,6 +580,7 @@ export const routeTree = rootRoute
     "/_app": {
       "filePath": "_app.tsx",
       "children": [
+        "/_app/administration",
         "/_app/audits",
         "/_app/calendar",
         "/_app/capa",
@@ -522,14 +589,20 @@ export const routeTree = rootRoute
         "/_app/documents",
         "/_app/equipment",
         "/_app/management-review",
+        "/_app/nonconformities",
         "/_app/pms",
         "/_app/production",
         "/_app/products",
         "/_app/reports",
         "/_app/risk",
+        "/_app/suppliers",
         "/_app/technical-documentation",
         "/_app/training"
       ]
+    },
+    "/_app/administration": {
+      "filePath": "_app/administration.tsx",
+      "parent": "/_app"
     },
     "/_app/audits": {
       "filePath": "_app/audits.tsx",
@@ -563,6 +636,10 @@ export const routeTree = rootRoute
       "filePath": "_app/management-review.tsx",
       "parent": "/_app"
     },
+    "/_app/nonconformities": {
+      "filePath": "_app/nonconformities.tsx",
+      "parent": "/_app"
+    },
     "/_app/pms": {
       "filePath": "_app/pms.tsx",
       "parent": "/_app"
@@ -587,6 +664,10 @@ export const routeTree = rootRoute
     },
     "/_app/risk": {
       "filePath": "_app/risk.tsx",
+      "parent": "/_app"
+    },
+    "/_app/suppliers": {
+      "filePath": "_app/suppliers.tsx",
       "parent": "/_app"
     },
     "/_app/technical-documentation": {
